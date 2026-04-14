@@ -37,8 +37,10 @@ export default function Home() {
             </code>
             . Eventos:{" "}
             <span className="font-mono text-xs">
-              widget_ready, verification_started, verification_succeeded,
-              verification_failed, verification_cancelled
+              widget_ready, apps_submitted (oldPhoneE164, newPhoneE164,
+              oldCountryIso, newCountryIso), verification_started,
+              verification_succeeded, verification_failed,
+              verification_cancelled
             </span>
             .
           </p>
