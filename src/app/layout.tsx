@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Verificación de perfil · Punto Pago",
+  title: "Cambio de perfil · Punto Pago",
   description:
-    "Widget de verificación de seguridad para cambio de perfil — Grupo Punto Pago Panamá",
+    "Migración de número de app y verificación para cambio de perfil — Grupo Punto Pago Panamá",
 };
 
 export default function RootLayout({

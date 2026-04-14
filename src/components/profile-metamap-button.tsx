@@ -80,7 +80,7 @@ export function ProfileMetamapButton({
       "absolute inset-0 z-20 min-h-[52px] min-w-[200px] block cursor-pointer opacity-0";
     btn.setAttribute(
       "aria-label",
-      "Iniciar verificación de identidad con MetaMap",
+      "Iniciar verificación de identidad con documento y selfie",
     );
     host.appendChild(btn);
     const detach = attachListeners(btn);
@@ -99,11 +99,11 @@ export function ProfileMetamapButton({
       />
       <div>
         <h3 className="text-sm font-semibold text-[#0B0B13]">
-          Verificación de identidad (MetaMap)
+          Verificación de identidad
         </h3>
         <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-          Valida tu identidad con documento vigente y selfie. Los números de app
-          indicados se envían como referencia en los metadatos de la verificación.
+          Necesitamos comprobar que eres tú: ten a mano tu documento de identidad
+          vigente y sigue los pasos en pantalla (incluye una foto tipo selfie).
         </p>
       </div>
 
@@ -118,7 +118,7 @@ export function ProfileMetamapButton({
           className="pointer-events-none relative z-10 flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#4749B6]/30"
           tabIndex={-1}
         >
-          Verificar perfil con MetaMap
+          Verificar identidad
         </button>
         {!scriptReady ? (
           <p className="mt-2 text-center text-xs text-slate-500">

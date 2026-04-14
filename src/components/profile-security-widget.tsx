@@ -48,9 +48,6 @@ export function ProfileSecurityWidget({
   const [newNational, setNewNational] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [metamapVerificationId, setMetamapVerificationId] = useState("");
-  const [metamapIdentityId, setMetamapIdentityId] = useState("");
-
   useEffect(() => {
     notifyParent({ type: "widget_ready" });
   }, []);
@@ -141,7 +138,9 @@ export function ProfileSecurityWidget({
           newPhoneE164: newE164,
         });
       } else {
-        setError("Código incorrecto. Revisa el mensaje o solicita uno nuevo.");
+        setError(
+          "Código incorrecto. Revisa el código en tu app Punto Pago e inténtalo de nuevo.",
+        );
         notifyParent({ type: "verification_failed" });
       }
     },
@@ -150,8 +149,6 @@ export function ProfileSecurityWidget({
 
   const onMetamapComplete = useCallback(
     (ids: { verificationId: string; identityId: string }) => {
-      setMetamapVerificationId(ids.verificationId);
-      setMetamapIdentityId(ids.identityId);
       notifyParent({
         type: "metamap_finished",
         verificationId: ids.verificationId,
@@ -204,15 +201,30 @@ export function ProfileSecurityWidget({
               <strong>número de app anterior</strong> en Punto Pago serán{" "}
               <strong>migrados</strong> al <strong>número de app nuevo</strong>{" "}
               que indiques en el siguiente paso. Asegúrate de que ambos números
-              son correctos; esta acción forma parte del proceso de cambio de
+              son correctos; aquí solo registramos y autorizas ese cambio de
               perfil.
             </p>
           </div>
 
+          <div
+            className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700 shadow-sm"
+            role="note"
+          >
+            <p className="font-semibold text-[#0B0B13]">
+              Límite de cambios de perfil
+            </p>
+            <p className="mt-2">
+              Solo puedes realizar un <strong>cambio de perfil</strong> (migración
+              de número) <strong>una vez cada 2 meses</strong>. Úsalo cuando
+              realmente vayas a quedarte con el número nuevo; no está pensado
+              para cambiar de número con frecuencia.
+            </p>
+          </div>
+
           <p className="text-sm leading-relaxed text-slate-600">
-            En los pasos siguientes ingresarás el app anterior y el nuevo,
-            confirmarás un código de verificación y validarás tu identidad con
-            MetaMap.
+            Después indicarás el app anterior y el nuevo, confirmarás con el{" "}
+            <strong>código que muestra tu app Punto Pago</strong> (como cuando
+            inicias sesión) y completarás una breve verificación de identidad.
             {merchantLabel ? (
               <>
                 {" "}
@@ -242,7 +254,8 @@ export function ProfileSecurityWidget({
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
               Los datos del app anterior se migrarán al número nuevo. Indica ambos
               números; por defecto el país es Panamá (+507) y puedes cambiar el
-              país en cada campo si aplica.
+              país en cada campo si aplica. Recuerda:{" "}
+              <strong>un cambio de perfil cada 2 meses como máximo</strong>.
             </p>
           </div>
 
@@ -284,30 +297,26 @@ export function ProfileSecurityWidget({
               type="submit"
               className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99] sm:min-w-[200px]"
             >
-              Continuar a verificación
+              Continuar
             </button>
           </div>
-          <p className="text-center text-[11px] text-slate-500">
-            Demo del código:{" "}
-            <span className="font-mono font-semibold text-slate-700">
-              000000
-            </span>
-          </p>
         </form>
       )}
 
       {step === "code" && (
         <form className="space-y-4" onSubmit={onSubmitCode}>
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Ingresa el código
+            Código en tu app Punto Pago
           </h1>
           <p className="text-sm text-slate-600">
-            Enviamos un código de {CODE_LEN} dígitos para confirmar el cambio
-            entre{" "}
+            Abre la aplicación Punto Pago y usa el{" "}
+            <strong>mismo código de verificación que ves al iniciar sesión</strong>
+            . Aquí no te enviamos un mensaje nuevo: solo confirmas que autorizas
+            la migración de{" "}
             <span className="font-mono font-medium text-slate-800">
               {oldE164}
             </span>{" "}
-            y{" "}
+            a{" "}
             <span className="font-mono font-medium text-slate-800">
               {newE164}
             </span>
@@ -323,7 +332,7 @@ export function ProfileSecurityWidget({
             }
             className="w-full rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-center font-mono text-2xl tracking-[0.35em] text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none ring-0 transition focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25"
             placeholder="······"
-            aria-label="Código de verificación"
+            aria-label="Código de verificación de la app Punto Pago"
           />
           {error ? (
             <p className="text-sm font-medium text-red-600" role="alert">
@@ -360,8 +369,9 @@ export function ProfileSecurityWidget({
             Verificación de identidad
           </h1>
           <p className="text-sm text-slate-600">
-            Código confirmado para {oldE164} → {newE164}. Completa la
-            verificación con MetaMap para finalizar.
+            Ya confirmaste la migración entre {oldE164} y {newE164}. Falta un
+            último paso: validar tu identidad con documento y selfie para
+            completar el cambio de perfil.
           </p>
           <ProfileMetamapButton
             metadata={metamapMetadata}
@@ -377,7 +387,7 @@ export function ProfileSecurityWidget({
             }}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            Volver al código
+            Volver al código de la app
           </button>
         </div>
       )}
@@ -388,31 +398,19 @@ export function ProfileSecurityWidget({
             ✓
           </div>
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Verificación completada
+            Cambio de perfil completado
           </h1>
           <p className="text-sm text-slate-600">
-            Ya puedes continuar con el cambio de perfil en la aplicación de Punto
-            Pago.
+            Tu identidad quedó validada y la migración entre números quedó
+            registrada. Puedes seguir usando la aplicación Punto Pago con tu
+            número nuevo.
           </p>
           <p className="text-xs text-slate-500">
-            Apps:{" "}
+            Números:{" "}
             <span className="font-mono text-slate-700">{oldE164}</span>
             {" → "}
             <span className="font-mono text-slate-700">{newE164}</span>
           </p>
-          {metamapVerificationId ? (
-            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 px-3 py-2 text-left text-xs text-emerald-900">
-              <p className="font-semibold">MetaMap</p>
-              <p className="mt-1 font-mono break-all">
-                Verificación: {metamapVerificationId}
-              </p>
-              {metamapIdentityId ? (
-                <p className="mt-1 font-mono break-all">
-                  Identidad: {metamapIdentityId}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
         </div>
       )}
     </div>
