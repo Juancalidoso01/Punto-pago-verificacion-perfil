@@ -24,14 +24,14 @@ export function MigrationAnalysisPending({
         <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
           Analizando tu información
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <p className="mt-3 break-words text-base leading-relaxed text-slate-600 sm:text-sm">
           Estamos validando el número de app anterior{" "}
-          <span className="font-mono font-semibold text-slate-800">
+          <span className="inline-block max-w-full font-mono font-semibold text-slate-800">
             {oldPhoneE164}
           </span>{" "}
           en nuestros sistemas y la verificación de identidad asociada a la
           migración hacia{" "}
-          <span className="font-mono font-semibold text-slate-800">
+          <span className="inline-block max-w-full font-mono font-semibold text-slate-800">
             {newPhoneE164}
           </span>
           . Esto puede tardar hasta un minuto.
@@ -53,7 +53,7 @@ export function MigrationAnalysisPending({
         >
           <div className="pp-migration-analysis-bar h-full w-full rounded-full bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] shadow-sm shadow-[#4749B6]/25" />
         </div>
-        <p className="text-center text-xs font-medium text-slate-500">
+        <p className="text-center text-sm font-medium text-slate-500 sm:text-xs">
           No cierres esta ventana
         </p>
       </div>

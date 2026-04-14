@@ -220,8 +220,15 @@ export function CambioPerfilFlow({
   }, [oldE164, newE164]);
 
   const cardClass = compact
-    ? "rounded-2xl border border-white/70 bg-white/90 p-5 shadow-lg shadow-slate-900/[0.06] backdrop-blur-md sm:p-6"
-    : "mx-auto max-w-lg rounded-2xl border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-900/[0.08] backdrop-blur-md sm:p-8";
+    ? "w-full max-w-[min(100%,28rem)] rounded-2xl border border-white/70 bg-white/90 p-4 shadow-lg shadow-slate-900/[0.06] backdrop-blur-md sm:p-6"
+    : "mx-auto w-full max-w-lg rounded-2xl border border-white/70 bg-white/90 p-4 shadow-xl shadow-slate-900/[0.08] backdrop-blur-md sm:p-8";
+
+  const btnPrimary =
+    "pp-touch min-h-12 w-full rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition active:opacity-90 enabled:hover:brightness-[1.03] sm:text-sm";
+  const btnPrimaryCompact =
+    "pp-touch min-h-12 w-full rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition active:opacity-90 enabled:hover:brightness-[1.03] enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-[200px] sm:text-sm";
+  const btnSecondary =
+    "pp-touch min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-medium text-slate-700 transition hover:bg-slate-50 active:bg-slate-100 sm:w-auto sm:py-2.5 sm:text-sm";
 
   return (
     <div className={cardClass}>
@@ -276,11 +283,7 @@ export function CambioPerfilFlow({
             ) : null}
           </p>
 
-          <button
-            type="button"
-            onClick={() => setStep("apps")}
-            className="w-full rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99]"
-          >
+          <button type="button" onClick={() => setStep("apps")} className={btnPrimary}>
             Entendido, continuar
           </button>
         </div>
@@ -329,18 +332,18 @@ export function CambioPerfilFlow({
             </p>
           ) : null}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-2">
             <button
               type="button"
               onClick={() => setStep("notice")}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className={btnSecondary}
             >
               Volver al aviso
             </button>
             <button
               type="submit"
               disabled={!canContinueApps}
-              className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition enabled:hover:brightness-[1.03] enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[200px]"
+              className={btnPrimaryCompact}
             >
               Continuar
             </button>
@@ -353,17 +356,19 @@ export function CambioPerfilFlow({
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
             Verificación de identidad
           </h1>
-          <p className="text-sm text-slate-600">
-            Registraste la migración de{" "}
-            <span className="font-mono font-medium text-slate-800">
+          <p className="break-words text-sm leading-relaxed text-slate-600">
+            Quedó registrada la migración de{" "}
+            <span className="inline-block max-w-full font-mono font-medium text-slate-800">
               {oldE164}
             </span>{" "}
             a{" "}
-            <span className="font-mono font-medium text-slate-800">
+            <span className="inline-block max-w-full font-mono font-medium text-slate-800">
               {newE164}
             </span>
-            . Pulsa el botón e inicia la verificación en pantalla (documento
-            vigente y selfie) para completar el cambio de perfil.
+            . Para completar el cambio de perfil debemos confirmar que eres tú:
+            ten a mano un <strong>documento de identidad vigente</strong>, pulsa
+            el botón de abajo y sigue los pasos en pantalla (incluye una{" "}
+            <strong>foto tipo selfie</strong>).
           </p>
           <ProfileMetamapButton
             metadata={metamapMetadata}
@@ -377,7 +382,7 @@ export function CambioPerfilFlow({
               setError(null);
               notifyParent({ type: "metamap_back_to_apps" });
             }}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className={btnSecondary}
           >
             Volver y editar números
           </button>
@@ -404,7 +409,7 @@ export function CambioPerfilFlow({
             registrada. Puedes seguir usando la aplicación Punto Pago con tu
             número nuevo.
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="break-words text-xs text-slate-500">
             Números:{" "}
             <span className="font-mono text-slate-700">{oldE164}</span>
             {" → "}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,20 @@ export const metadata: Metadata = {
   title: "Cambio de perfil · Punto Pago",
   description:
     "Migración de número de app y verificación para cambio de perfil — Grupo Punto Pago Panamá",
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+/** Móvil: ancho correcto, notch/home indicator, color de barra de estado. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f5fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b13" },
+  ],
 };
 
 export default function RootLayout({
@@ -26,9 +40,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className="h-full overflow-x-clip">
       <body
-        className={`${plusJakarta.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${plusJakarta.variable} ${geistMono.variable} min-h-dvh overflow-x-clip bg-[var(--background)] font-sans text-[var(--foreground)] antialiased`}
       >
         {children}
       </body>

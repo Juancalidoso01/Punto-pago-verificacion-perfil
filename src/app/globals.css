@@ -3,6 +3,8 @@
 :root {
   --background: #f4f5fb;
   --foreground: #0b0b13;
+  /* Altura útil en móviles (barra de direcciones dinámica) */
+  --pp-viewport-height: 100dvh;
 }
 
 @theme inline {
@@ -17,9 +19,28 @@
   --color-surface: #f4f5fb;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+  /* Evita arrastre horizontal accidental en formularios largos */
+  overflow-x: clip;
+}
+
+/* Botones/enlaces: respuesta táctil rápida, sin rectángulo gris de tap en iOS */
+.pp-touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS: fuente ≥16px en campos evita zoom automático al enfocar */
+.pp-input-mobile {
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
 ::selection {

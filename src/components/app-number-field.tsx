@@ -3,7 +3,7 @@
 import { DIAL_COUNTRIES, type DialCountry } from "@/lib/dial-countries";
 
 const selectClass =
-  "max-w-[min(52%,11rem)] shrink-0 rounded-xl border border-slate-200/90 bg-slate-50/90 py-2.5 pl-2 pr-7 text-xs font-medium text-slate-800 outline-none focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25 sm:text-sm";
+  "pp-input-mobile pp-touch w-full min-h-12 shrink-0 rounded-xl border border-slate-200/90 bg-slate-50/90 py-2 pl-2 pr-8 font-medium text-[#0B0B13] outline-none focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25 sm:max-w-[11rem] sm:min-h-0 sm:w-auto sm:py-2.5 sm:text-sm";
 
 function FormatOkIcon() {
   return (
@@ -55,7 +55,7 @@ export function AppNumberField({
   duplicateError = false,
 }: Props) {
   const inputClass = [
-    "min-w-0 flex-1 rounded-xl border bg-white px-3 py-2.5 text-sm text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none transition",
+    "pp-input-mobile pp-touch min-h-12 min-w-0 flex-1 rounded-xl border bg-white px-3 py-2.5 text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none transition sm:min-h-0 sm:text-sm",
     duplicateError
       ? "border-red-400 ring-2 ring-red-200 focus:border-red-500 focus:ring-red-200"
       : "border-slate-200/90 focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25",
@@ -76,7 +76,7 @@ export function AppNumberField({
             {description}
           </span>
         ) : null}
-        <div className="flex flex-wrap items-stretch gap-2 sm:flex-nowrap">
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <select
             id={`${id}-country`}
             className={`${selectClass} ${selectStateClass}`}

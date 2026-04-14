@@ -77,10 +77,10 @@ export function ProfileMetamapButton({
     btn.setAttribute("flowId", cfg.flowId);
     btn.setAttribute("metadata", metadataJson);
     btn.className =
-      "absolute inset-0 z-20 min-h-[52px] min-w-[200px] block cursor-pointer opacity-0";
+      "absolute inset-0 z-20 min-h-14 min-w-0 w-full cursor-pointer opacity-0 sm:min-h-[52px]";
     btn.setAttribute(
       "aria-label",
-      "Iniciar verificación de identidad con documento y selfie",
+      "Abrir verificación de identidad con documento vigente y selfie",
     );
     host.appendChild(btn);
     const detach = attachListeners(btn);
@@ -91,31 +91,22 @@ export function ProfileMetamapButton({
   }, [scriptReady, cfg.clientId, cfg.flowId, metadataJson, attachListeners]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <Script
         src={METAMAP_SCRIPT_SRC}
         strategy="afterInteractive"
         onLoad={() => setScriptReady(true)}
       />
-      <div>
-        <h3 className="text-sm font-semibold text-[#0B0B13]">
-          Verificación de identidad
-        </h3>
-        <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-          Necesitamos comprobar que eres tú: ten a mano tu documento de identidad
-          vigente y sigue los pasos en pantalla (incluye una foto tipo selfie).
-        </p>
-      </div>
 
-      <div className="relative w-full min-h-[52px]">
+      <div className="relative w-full min-h-14 sm:min-h-[52px]">
         <div
           ref={wrapRef}
-          className="absolute inset-0 z-20 min-h-[52px]"
+          className="absolute inset-0 z-20 min-h-14 sm:min-h-[52px]"
           aria-hidden
         />
         <button
           type="button"
-          className="pointer-events-none relative z-10 flex w-full min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#4749B6]/30"
+          className="pointer-events-none relative z-10 flex w-full min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-5 py-4 text-base font-bold text-white shadow-lg shadow-[#4749B6]/30 sm:min-h-[52px] sm:px-6"
           tabIndex={-1}
         >
           Verificar identidad
