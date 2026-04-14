@@ -12,6 +12,7 @@ const baselineSecurityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async redirects() {
     return [
       {

@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { parseSafeMetamapCallbackId } from "@/lib/embed-security";
 import { getMetamapPublicConfig } from "@/lib/metamap-public-config";
 
 const METAMAP_SCRIPT_SRC = "https://web-button.metamap.com/button.js";
@@ -35,21 +36,20 @@ export function ProfileMetamapButton({
         (window as unknown as { __ppMetamapModalOpen?: boolean }).__ppMetamapModalOpen =
           false;
         const d = (e as CustomEvent<Record<string, unknown>>).detail ?? {};
-        const verificationId = String(
+        const verificationRaw = String(
           (d as { verificationId?: string }).verificationId ??
             (d as { verification_id?: string }).verification_id ??
             "",
         );
-        const identityId = String(
+        const identityRaw = String(
           (d as { identityId?: string }).identityId ??
             (d as { identity_id?: string }).identity_id ??
             "",
         );
+        const verificationId = parseSafeMetamapCallbackId(verificationRaw);
+        const identityId = parseSafeMetamapCallbackId(identityRaw) ?? "";
         if (verificationId) {
-          onComplete({
-            verificationId,
-            identityId: identityId.trim(),
-          });
+          onComplete({ verificationId, identityId });
         }
       };
       const onExit = () => {

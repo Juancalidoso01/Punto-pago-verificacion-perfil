@@ -10,13 +10,32 @@ function envOriginsList(): string[] {
 }
 
 /**
- * Origen explícito al enviar al padre. Si no se define, en producción conviene fijarlo
- * al dominio real del embedder (p. ej. `https://app.puntopago.net`).
+ * Origen explícito al enviar al padre (variable opcional en Vercel).
  */
 export function getPostMessageTargetOrigin(): string {
   return (
     process.env.NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN?.trim() || "*"
   );
+}
+
+/**
+ * Destino real para `postMessage` al padre: sin configuración manual, si el iframe
+ * tiene `document.referrer` de un dominio Punto Pago (o localhost), se usa ese origen
+ * en lugar de `*`.
+ */
+export function resolvePostMessageTargetOriginForSend(): string {
+  const explicit = process.env.NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN?.trim();
+  if (explicit) return explicit;
+  if (typeof document === "undefined") return "*";
+  const ref = document.referrer;
+  if (!ref) return "*";
+  try {
+    const origin = new URL(ref).origin;
+    if (isAllowedParentMessageOrigin(origin)) return origin;
+  } catch {
+    /* ignore */
+  }
+  return "*";
 }
 
 function hostnameAllowed(hostname: string): boolean {
@@ -73,4 +92,59 @@ export function safeDecodeURIComponent(value: string): string {
   } catch {
     return value;
   }
+}
+
+const METAMAP_METADATA_KEYS = new Set([
+  "source",
+  "oldPhoneE164",
+  "newPhoneE164",
+  "oldCountryIso",
+  "newCountryIso",
+  "merchantLabel",
+]);
+
+const E164_RE = /^\+[1-9]\d{5,14}$/;
+const ISO_COUNTRY_RE = /^[A-Z]{2}$/;
+const FIXED_SOURCE = "punto-pago-cambio-perfil";
+
+/**
+ * Solo claves esperadas y valores con forma válida (defensa ante estados raros o futuros cambios).
+ */
+export function buildSafeMetamapMetadata(
+  raw: Record<string, string>,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (!METAMAP_METADATA_KEYS.has(k)) continue;
+    const val = v.replace(/\0/g, "").trim();
+    if (k === "source") {
+      if (val === FIXED_SOURCE) out[k] = val;
+      continue;
+    }
+    if (k === "oldPhoneE164" || k === "newPhoneE164") {
+      if (E164_RE.test(val)) out[k] = val;
+      continue;
+    }
+    if (k === "oldCountryIso" || k === "newCountryIso") {
+      const u = val.toUpperCase();
+      if (ISO_COUNTRY_RE.test(u)) out[k] = u;
+      continue;
+    }
+    if (k === "merchantLabel") {
+      const c = clampEmbedText(val, EMBED_MERCHANT_LABEL_MAX_LENGTH);
+      if (c) out[k] = c;
+    }
+  }
+  if (!out.source) out.source = FIXED_SOURCE;
+  return out;
+}
+
+/** IDs devueltos por el SDK MetaMap en el evento de finalización. */
+const METAMAP_CALLBACK_ID_RE = /^[a-zA-Z0-9_-]{1,128}$/;
+
+export function parseSafeMetamapCallbackId(value: string): string | null {
+  const t = value.trim();
+  if (!t || t.length > 128) return null;
+  if (!METAMAP_CALLBACK_ID_RE.test(t)) return null;
+  return t;
 }

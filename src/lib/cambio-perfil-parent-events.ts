@@ -54,8 +54,9 @@
  *
  * El iframe **solo aplica** estos mensajes si `event.origin` está permitido (mismo criterio
  * que `frame-ancestors`: `*.puntopago.net`, `localhost`, o lista en
- * `NEXT_PUBLIC_ALLOWED_PARENT_ORIGINS`). Opcional: `NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN`
- * para dejar de usar `*` al enviar eventos al padre.
+ * `NEXT_PUBLIC_ALLOWED_PARENT_ORIGINS`). Al **enviar** al padre: si no hay
+ * `NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN`, se intenta usar el origen de `document.referrer`
+ * cuando sea de confianza; si no, `*`.
  *
  * Códigos recomendados (textos en `CAMBIO_PERFIL_ERROR_MESSAGES`):
  * - `OLD_APP_NUMBER_NOT_FOUND` — número anterior no existe.

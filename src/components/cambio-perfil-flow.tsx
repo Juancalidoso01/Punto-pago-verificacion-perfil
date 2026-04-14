@@ -18,9 +18,10 @@ import {
 } from "@/lib/cambio-perfil-errors";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
+  buildSafeMetamapMetadata,
   clampEmbedText,
-  getPostMessageTargetOrigin,
   isAllowedParentMessageOrigin,
+  resolvePostMessageTargetOriginForSend,
 } from "@/lib/embed-security";
 import {
   DEFAULT_DIAL_ISO,
@@ -42,7 +43,7 @@ function notifyParent(payload: Record<string, unknown>) {
   try {
     window.parent?.postMessage(
       { source: PARENT_MESSAGE_SOURCE, ...payload },
-      getPostMessageTargetOrigin(),
+      resolvePostMessageTargetOriginForSend(),
     );
   } catch {
     /* ignore */
@@ -138,7 +139,7 @@ export function CambioPerfilFlow({
     };
     const label = (merchantLabel ?? "").trim();
     if (label) m.merchantLabel = label;
-    return m;
+    return buildSafeMetamapMetadata(m);
   }, [oldE164, newE164, oldCountryIso, newCountryIso, merchantLabel]);
 
   const oldLen = onlyDigits(oldNational).length;
