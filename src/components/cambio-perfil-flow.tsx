@@ -18,6 +18,11 @@ import {
 } from "@/lib/cambio-perfil-errors";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
+  clampEmbedText,
+  getPostMessageTargetOrigin,
+  isAllowedParentMessageOrigin,
+} from "@/lib/embed-security";
+import {
   DEFAULT_DIAL_ISO,
   findDialCountry,
   onlyDigits,
@@ -37,7 +42,7 @@ function notifyParent(payload: Record<string, unknown>) {
   try {
     window.parent?.postMessage(
       { source: PARENT_MESSAGE_SOURCE, ...payload },
-      "*",
+      getPostMessageTargetOrigin(),
     );
   } catch {
     /* ignore */
@@ -71,6 +76,7 @@ export function CambioPerfilFlow({
     function onMessage(ev: MessageEvent) {
       const d = ev.data;
       if (!d || typeof d !== "object") return;
+      if (!isAllowedParentMessageOrigin(ev.origin)) return;
       if ((d as { source?: unknown }).source !== CAMBIO_PERFIL_HOST_MESSAGE_SOURCE)
         return;
       if ((d as { type?: unknown }).type !== "flow_error") return;
@@ -81,8 +87,11 @@ export function CambioPerfilFlow({
       };
       const code =
         typeof raw.errorCode === "string" ? raw.errorCode : "";
-      const custom =
+      const customRaw =
         typeof raw.message === "string" ? raw.message : undefined;
+      const custom = customRaw
+        ? clampEmbedText(customRaw, 500)
+        : undefined;
       setError(resolveCambioPerfilErrorMessage(code, custom));
       const s = raw.step;
       if (s === "apps" || s === "notice" || s === "metamap") {

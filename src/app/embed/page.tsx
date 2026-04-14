@@ -1,5 +1,10 @@
 import { CambioPerfilFlow } from "@/components/cambio-perfil-flow";
 import { PpAmbient } from "@/components/pp-ambient";
+import {
+  clampEmbedText,
+  EMBED_MERCHANT_LABEL_MAX_LENGTH,
+  safeDecodeURIComponent,
+} from "@/lib/embed-security";
 
 type SearchParams = Promise<{ label?: string | string[] }>;
 
@@ -10,12 +15,15 @@ export default async function EmbedPage({
 }) {
   const sp = await searchParams;
   const raw = sp.label;
-  const merchantLabel =
+  const decoded =
     typeof raw === "string"
-      ? decodeURIComponent(raw).trim() || null
+      ? safeDecodeURIComponent(raw).trim()
       : Array.isArray(raw)
-        ? decodeURIComponent(raw[0] ?? "").trim() || null
-        : null;
+        ? safeDecodeURIComponent(raw[0] ?? "").trim()
+        : "";
+  const merchantLabel = decoded
+    ? clampEmbedText(decoded, EMBED_MERCHANT_LABEL_MAX_LENGTH)
+    : null;
 
   return (
     <div className="pp-page-bg relative min-h-dvh min-h-[100dvh]">

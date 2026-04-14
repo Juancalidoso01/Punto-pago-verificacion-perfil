@@ -52,6 +52,11 @@
  * );
  * ```
  *
+ * El iframe **solo aplica** estos mensajes si `event.origin` está permitido (mismo criterio
+ * que `frame-ancestors`: `*.puntopago.net`, `localhost`, o lista en
+ * `NEXT_PUBLIC_ALLOWED_PARENT_ORIGINS`). Opcional: `NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN`
+ * para dejar de usar `*` al enviar eventos al padre.
+ *
  * Códigos recomendados (textos en `CAMBIO_PERFIL_ERROR_MESSAGES`):
  * - `OLD_APP_NUMBER_NOT_FOUND` — número anterior no existe.
  * - `OLD_APP_NUMBER_NO_PROFILE` — sin perfil previo Punto Pago en ese número.
