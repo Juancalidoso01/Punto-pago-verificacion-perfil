@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { AppNumberField } from "@/components/app-number-field";
+import { ProfileMetamapButton } from "@/components/profile-metamap-button";
 import {
   DEFAULT_DIAL_ISO,
   findDialCountry,
@@ -15,7 +16,7 @@ import {
   toE164,
 } from "@/lib/dial-countries";
 
-type Step = "apps" | "code" | "done";
+type Step = "notice" | "apps" | "code" | "metamap" | "done";
 
 const CODE_LEN = 6;
 const MIN_NATIONAL = 6;
@@ -40,13 +41,15 @@ export function ProfileSecurityWidget({
   compact?: boolean;
   merchantLabel?: string | null;
 }) {
-  const [step, setStep] = useState<Step>("apps");
+  const [step, setStep] = useState<Step>("notice");
   const [oldCountryIso, setOldCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [oldNational, setOldNational] = useState("");
   const [newCountryIso, setNewCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [newNational, setNewNational] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [metamapVerificationId, setMetamapVerificationId] = useState("");
+  const [metamapIdentityId, setMetamapIdentityId] = useState("");
 
   useEffect(() => {
     notifyParent({ type: "widget_ready" });
@@ -68,6 +71,19 @@ export function ProfileSecurityWidget({
     () => toE164(newDial, newNational),
     [newDial, newNational],
   );
+
+  const metamapMetadata = useMemo((): Record<string, string> => {
+    const m: Record<string, string> = {
+      source: "punto-pago-verificacion-perfil",
+      oldPhoneE164: oldE164,
+      newPhoneE164: newE164,
+      oldCountryIso,
+      newCountryIso,
+    };
+    const label = (merchantLabel ?? "").trim();
+    if (label) m.merchantLabel = label;
+    return m;
+  }, [oldE164, newE164, oldCountryIso, newCountryIso, merchantLabel]);
 
   const oldLen = onlyDigits(oldNational).length;
   const newLen = onlyDigits(newNational).length;
@@ -103,13 +119,7 @@ export function ProfileSecurityWidget({
       });
       notifyParent({ type: "verification_started" });
     },
-    [
-      appsValid,
-      oldE164,
-      newE164,
-      oldCountryIso,
-      newCountryIso,
-    ],
+    [appsValid, oldE164, newE164, oldCountryIso, newCountryIso],
   );
 
   const canSubmitCode = useMemo(
@@ -124,10 +134,9 @@ export function ProfileSecurityWidget({
       setError(null);
       const ok = code === "000000";
       if (ok) {
-        setStep("done");
+        setStep("metamap");
         notifyParent({
-          type: "verification_succeeded",
-          code: "***",
+          type: "otp_verified",
           oldPhoneE164: oldE164,
           newPhoneE164: newE164,
         });
@@ -139,12 +148,91 @@ export function ProfileSecurityWidget({
     [canSubmitCode, code, oldE164, newE164],
   );
 
+  const onMetamapComplete = useCallback(
+    (ids: { verificationId: string; identityId: string }) => {
+      setMetamapVerificationId(ids.verificationId);
+      setMetamapIdentityId(ids.identityId);
+      notifyParent({
+        type: "metamap_finished",
+        verificationId: ids.verificationId,
+        identityId: ids.identityId,
+        oldPhoneE164: oldE164,
+        newPhoneE164: newE164,
+      });
+      setStep("done");
+      notifyParent({
+        type: "verification_succeeded",
+        code: "***",
+        oldPhoneE164: oldE164,
+        newPhoneE164: newE164,
+        metamapVerificationId: ids.verificationId,
+        metamapIdentityId: ids.identityId,
+      });
+    },
+    [oldE164, newE164],
+  );
+
+  const onMetamapUserStarted = useCallback(() => {
+    notifyParent({
+      type: "metamap_started",
+      oldPhoneE164: oldE164,
+      newPhoneE164: newE164,
+    });
+  }, [oldE164, newE164]);
+
   const cardClass = compact
     ? "rounded-2xl border border-white/70 bg-white/90 p-5 shadow-lg shadow-slate-900/[0.06] backdrop-blur-md sm:p-6"
     : "mx-auto max-w-lg rounded-2xl border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-900/[0.08] backdrop-blur-md sm:p-8";
 
   return (
     <div className={cardClass}>
+      {step === "notice" && (
+        <div className="space-y-5">
+          <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
+            Cambio de número de app
+          </h1>
+
+          <div
+            className="rounded-xl border border-amber-200/90 bg-gradient-to-br from-amber-50/95 to-amber-50/40 p-4 shadow-sm ring-1 ring-amber-100/80"
+            role="note"
+          >
+            <p className="text-sm font-semibold text-amber-950">
+              Importante: migración de datos
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-amber-950/90">
+              La información y el historial asociados a tu{" "}
+              <strong>número de app anterior</strong> en Punto Pago serán{" "}
+              <strong>migrados</strong> al <strong>número de app nuevo</strong>{" "}
+              que indiques en el siguiente paso. Asegúrate de que ambos números
+              son correctos; esta acción forma parte del proceso de cambio de
+              perfil.
+            </p>
+          </div>
+
+          <p className="text-sm leading-relaxed text-slate-600">
+            En los pasos siguientes ingresarás el app anterior y el nuevo,
+            confirmarás un código de verificación y validarás tu identidad con
+            MetaMap.
+            {merchantLabel ? (
+              <>
+                {" "}
+                <span className="font-semibold text-slate-800">
+                  {merchantLabel}
+                </span>
+              </>
+            ) : null}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setStep("apps")}
+            className="w-full rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99]"
+          >
+            Entendido, continuar
+          </button>
+        </div>
+      )}
+
       {step === "apps" && (
         <form className="space-y-5" onSubmit={onSubmitApps}>
           <div>
@@ -152,17 +240,9 @@ export function ProfileSecurityWidget({
               Datos de tus apps en Punto Pago
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Indica el número de app con el que usabas Punto Pago y el número de
-              tu app nueva. Por defecto el país es Panamá (+507); puedes cambiar
-              el país si tu número es de otro prefijo.
-              {merchantLabel ? (
-                <>
-                  {" "}
-                  <span className="font-semibold text-slate-800">
-                    {merchantLabel}
-                  </span>
-                </>
-              ) : null}
+              Los datos del app anterior se migrarán al número nuevo. Indica ambos
+              números; por defecto el país es Panamá (+507) y puedes cambiar el
+              país en cada campo si aplica.
             </p>
           </div>
 
@@ -179,7 +259,7 @@ export function ProfileSecurityWidget({
           <AppNumberField
             id="new-app"
             label="Número de app nuevo"
-            description="El número de app al que quieres asociar tu perfil."
+            description="El número de app al que se migrará tu perfil y datos."
             countryIso={newCountryIso}
             onCountryIso={setNewCountryIso}
             nationalDigits={newNational}
@@ -192,12 +272,21 @@ export function ProfileSecurityWidget({
             </p>
           ) : null}
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99]"
-          >
-            Continuar a verificación
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <button
+              type="button"
+              onClick={() => setStep("notice")}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Volver al aviso
+            </button>
+            <button
+              type="submit"
+              className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99] sm:min-w-[200px]"
+            >
+              Continuar a verificación
+            </button>
+          </div>
           <p className="text-center text-[11px] text-slate-500">
             Demo del código:{" "}
             <span className="font-mono font-semibold text-slate-700">
@@ -265,6 +354,34 @@ export function ProfileSecurityWidget({
         </form>
       )}
 
+      {step === "metamap" && (
+        <div className="space-y-5">
+          <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
+            Verificación de identidad
+          </h1>
+          <p className="text-sm text-slate-600">
+            Código confirmado para {oldE164} → {newE164}. Completa la
+            verificación con MetaMap para finalizar.
+          </p>
+          <ProfileMetamapButton
+            metadata={metamapMetadata}
+            onComplete={onMetamapComplete}
+            onUserStartedSdk={onMetamapUserStarted}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setStep("code");
+              setError(null);
+              notifyParent({ type: "metamap_back_to_otp" });
+            }}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            Volver al código
+          </button>
+        </div>
+      )}
+
       {step === "done" && (
         <div className="space-y-4 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl shadow-inner ring-1 ring-emerald-100">
@@ -278,11 +395,24 @@ export function ProfileSecurityWidget({
             Pago.
           </p>
           <p className="text-xs text-slate-500">
-            Apps registradas:{" "}
+            Apps:{" "}
             <span className="font-mono text-slate-700">{oldE164}</span>
             {" → "}
             <span className="font-mono text-slate-700">{newE164}</span>
           </p>
+          {metamapVerificationId ? (
+            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 px-3 py-2 text-left text-xs text-emerald-900">
+              <p className="font-semibold">MetaMap</p>
+              <p className="mt-1 font-mono break-all">
+                Verificación: {metamapVerificationId}
+              </p>
+              {metamapIdentityId ? (
+                <p className="mt-1 font-mono break-all">
+                  Identidad: {metamapIdentityId}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       )}
     </div>

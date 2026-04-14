@@ -35,12 +35,13 @@ export default function Home() {
             <code className="rounded bg-slate-100 px-1 font-mono text-xs">
               source: &quot;punto-pago-perfil-seguridad&quot;
             </code>
-            . Eventos:{" "}
+            . Flujo: aviso migración → números → código OTP → MetaMap → listo.
+            Eventos:{" "}
             <span className="font-mono text-xs">
-              widget_ready, apps_submitted (oldPhoneE164, newPhoneE164,
-              oldCountryIso, newCountryIso), verification_started,
-              verification_succeeded, verification_failed,
-              verification_cancelled
+              widget_ready, apps_submitted, verification_started, otp_verified,
+              metamap_started, metamap_finished, metamap_back_to_otp,
+              verification_succeeded (incluye metamapVerificationId si aplica),
+              verification_failed, verification_cancelled
             </span>
             .
           </p>
