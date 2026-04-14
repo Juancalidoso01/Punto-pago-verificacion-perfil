@@ -11,6 +11,11 @@ import {
 import { AppNumberField } from "@/components/app-number-field";
 import { MigrationAnalysisPending } from "@/components/migration-analysis-pending";
 import { ProfileMetamapButton } from "@/components/profile-metamap-button";
+import {
+  CAMBIO_PERFIL_ERROR_MESSAGES,
+  CAMBIO_PERFIL_HOST_MESSAGE_SOURCE,
+  resolveCambioPerfilErrorMessage,
+} from "@/lib/cambio-perfil-errors";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
   DEFAULT_DIAL_ISO,
@@ -59,6 +64,33 @@ export function CambioPerfilFlow({
 
   useEffect(() => {
     notifyParent({ type: "flow_ready" });
+  }, []);
+
+  /** El host (padre del iframe) puede enviar errores de negocio con `postMessage`. */
+  useEffect(() => {
+    function onMessage(ev: MessageEvent) {
+      const d = ev.data;
+      if (!d || typeof d !== "object") return;
+      if ((d as { source?: unknown }).source !== CAMBIO_PERFIL_HOST_MESSAGE_SOURCE)
+        return;
+      if ((d as { type?: unknown }).type !== "flow_error") return;
+      const raw = d as {
+        errorCode?: unknown;
+        message?: unknown;
+        step?: unknown;
+      };
+      const code =
+        typeof raw.errorCode === "string" ? raw.errorCode : "";
+      const custom =
+        typeof raw.message === "string" ? raw.message : undefined;
+      setError(resolveCambioPerfilErrorMessage(code, custom));
+      const s = raw.step;
+      if (s === "apps" || s === "notice" || s === "metamap") {
+        setStep(s);
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, []);
 
   useEffect(() => {
@@ -120,15 +152,11 @@ export function CambioPerfilFlow({
       e.preventDefault();
       setError(null);
       if (!oldFormatOk || !newFormatOk) {
-        setError(
-          `Indica el número de app con el prefijo elegido (${MIN_NATIONAL}–${MAX_NATIONAL} dígitos).`,
-        );
+        setError(CAMBIO_PERFIL_ERROR_MESSAGES.INVALID_NUMBER_FORMAT);
         return;
       }
       if (oldE164 === newE164) {
-        setError(
-          "El número de app nuevo debe ser distinto al número de app anterior.",
-        );
+        setError(CAMBIO_PERFIL_ERROR_MESSAGES.DUPLICATE_APP_NUMBERS);
         return;
       }
       setStep("metamap");

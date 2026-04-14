@@ -34,6 +34,31 @@
  *
  * Otros eventos existentes: `flow_ready`, `apps_submitted`, `verification_started`,
  * `metamap_started`, `metamap_back_to_apps`, etc.
+ *
+ * ## Mensajes del host hacia el iframe (errores de negocio)
+ *
+ * La ventana **padre** puede enviar al iframe:
+ *
+ * ```ts
+ * iframe.contentWindow.postMessage(
+ *   {
+ *     source: "punto-pago-cambio-perfil-host",
+ *     type: "flow_error",
+ *     errorCode: "OLD_APP_NUMBER_NOT_FOUND", // ver `cambio-perfil-errors.ts`
+ *     message: "opcional: texto si errorCode no está en el catálogo",
+ *     step: "apps", // opcional: "notice" | "apps" | "metamap" para volver y mostrar el error
+ *   },
+ *   targetOrigin,
+ * );
+ * ```
+ *
+ * Códigos recomendados (textos en `CAMBIO_PERFIL_ERROR_MESSAGES`):
+ * - `OLD_APP_NUMBER_NOT_FOUND` — número anterior no existe.
+ * - `OLD_APP_NUMBER_NO_PROFILE` — sin perfil previo Punto Pago en ese número.
+ * - `PROFILE_CHANGE_ALREADY_REGISTERED` — ya hay cambio registrado / política de 2 meses.
+ *
+ * También existen códigos de validación en cliente: `INVALID_NUMBER_FORMAT`,
+ * `DUPLICATE_APP_NUMBERS` (normalmente no hace falta enviarlos desde el host).
  */
 
 /** Tiempo de la barra “analizando información” en la UI (demo). Producción: alinear con backend o eliminar. */
