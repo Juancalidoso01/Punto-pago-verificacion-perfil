@@ -4,11 +4,14 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
 import { AppNumberField } from "@/components/app-number-field";
+import { MigrationAnalysisPending } from "@/components/migration-analysis-pending";
 import { ProfileMetamapButton } from "@/components/profile-metamap-button";
+import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
   DEFAULT_DIAL_ISO,
   findDialCountry,
@@ -16,9 +19,8 @@ import {
   toE164,
 } from "@/lib/dial-countries";
 
-type Step = "notice" | "apps" | "code" | "metamap" | "done";
+type Step = "notice" | "apps" | "metamap" | "analyzing" | "done";
 
-const CODE_LEN = 6;
 const MIN_NATIONAL = 6;
 const MAX_NATIONAL = 15;
 
@@ -50,10 +52,22 @@ export function CambioPerfilFlow({
   const [oldNational, setOldNational] = useState("");
   const [newCountryIso, setNewCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [newNational, setNewNational] = useState("");
-  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const analysisEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
   useEffect(() => {
     notifyParent({ type: "flow_ready" });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (analysisEndTimerRef.current !== null) {
+        clearTimeout(analysisEndTimerRef.current);
+        analysisEndTimerRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -88,17 +102,24 @@ export function CambioPerfilFlow({
 
   const oldLen = onlyDigits(oldNational).length;
   const newLen = onlyDigits(newNational).length;
-  const appsValid =
-    oldLen >= MIN_NATIONAL &&
-    oldLen <= MAX_NATIONAL &&
-    newLen >= MIN_NATIONAL &&
-    newLen <= MAX_NATIONAL;
+  const oldFormatOk =
+    oldLen >= MIN_NATIONAL && oldLen <= MAX_NATIONAL;
+  const newFormatOk =
+    newLen >= MIN_NATIONAL && newLen <= MAX_NATIONAL;
+  const duplicateNumbers =
+    oldFormatOk &&
+    newFormatOk &&
+    oldE164.length > 0 &&
+    oldE164 === newE164;
+
+  const canContinueApps =
+    oldFormatOk && newFormatOk && !duplicateNumbers;
 
   const onSubmitApps = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
       setError(null);
-      if (!appsValid) {
+      if (!oldFormatOk || !newFormatOk) {
         setError(
           `Indica el número de app con el prefijo elegido (${MIN_NATIONAL}–${MAX_NATIONAL} dígitos).`,
         );
@@ -110,7 +131,7 @@ export function CambioPerfilFlow({
         );
         return;
       }
-      setStep("code");
+      setStep("metamap");
       notifyParent({
         type: "apps_submitted",
         oldPhoneE164: oldE164,
@@ -120,57 +141,74 @@ export function CambioPerfilFlow({
       });
       notifyParent({ type: "verification_started" });
     },
-    [appsValid, oldE164, newE164, oldCountryIso, newCountryIso],
-  );
-
-  const canSubmitCode = useMemo(
-    () => code.replace(/\D/g, "").length === CODE_LEN,
-    [code],
-  );
-
-  const onSubmitCode = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      if (!canSubmitCode) return;
-      setError(null);
-      const ok = code === "000000";
-      if (ok) {
-        setStep("metamap");
-        notifyParent({
-          type: "otp_verified",
-          oldPhoneE164: oldE164,
-          newPhoneE164: newE164,
-        });
-      } else {
-        setError(
-          "Código incorrecto. Revisa el código en tu app Punto Pago e inténtalo de nuevo.",
-        );
-        notifyParent({ type: "verification_failed" });
-      }
-    },
-    [canSubmitCode, code, oldE164, newE164],
+    [
+      oldFormatOk,
+      newFormatOk,
+      oldE164,
+      newE164,
+      oldCountryIso,
+      newCountryIso,
+    ],
   );
 
   const onMetamapComplete = useCallback(
     (ids: { verificationId: string; identityId: string }) => {
+      const merchant = (merchantLabel ?? "").trim();
+
+      /** Backend: validar número anterior, identity, MetaMap, etc. Ver `cambio-perfil-parent-events.ts`. */
       notifyParent({
-        type: "metamap_finished",
+        type: "metamap_verification_submitted",
         verificationId: ids.verificationId,
         identityId: ids.identityId,
         oldPhoneE164: oldE164,
         newPhoneE164: newE164,
+        oldCountryIso,
+        newCountryIso,
+        ...(merchant ? { merchantLabel: merchant } : {}),
       });
-      setStep("done");
+
       notifyParent({
-        type: "verification_succeeded",
-        code: "***",
+        type: "migration_analysis_started",
+        estimatedDurationMs: MIGRATION_ANALYSIS_UI_MS,
         oldPhoneE164: oldE164,
         newPhoneE164: newE164,
-        metamapVerificationId: ids.verificationId,
-        metamapIdentityId: ids.identityId,
+        verificationId: ids.verificationId,
+        identityId: ids.identityId,
       });
+
+      setStep("analyzing");
+
+      if (analysisEndTimerRef.current !== null) {
+        clearTimeout(analysisEndTimerRef.current);
+      }
+      analysisEndTimerRef.current = setTimeout(() => {
+        analysisEndTimerRef.current = null;
+        notifyParent({
+          type: "metamap_finished",
+          verificationId: ids.verificationId,
+          identityId: ids.identityId,
+          oldPhoneE164: oldE164,
+          newPhoneE164: newE164,
+        });
+        notifyParent({
+          type: "verification_succeeded",
+          oldPhoneE164: oldE164,
+          newPhoneE164: newE164,
+          metamapVerificationId: ids.verificationId,
+          metamapIdentityId: ids.identityId,
+        });
+        notifyParent({
+          type: "migration_analysis_complete",
+          outcome: "success",
+          oldPhoneE164: oldE164,
+          newPhoneE164: newE164,
+          verificationId: ids.verificationId,
+          identityId: ids.identityId,
+        });
+        setStep("done");
+      }, MIGRATION_ANALYSIS_UI_MS);
     },
-    [oldE164, newE164],
+    [oldE164, newE164, oldCountryIso, newCountryIso, merchantLabel],
   );
 
   const onMetamapUserStarted = useCallback(() => {
@@ -226,9 +264,8 @@ export function CambioPerfilFlow({
           </div>
 
           <p className="text-sm leading-relaxed text-slate-600">
-            Después indicarás el app anterior y el nuevo, confirmarás con el{" "}
-            <strong>código que muestra tu app Punto Pago</strong> (como cuando
-            inicias sesión) y completarás una breve verificación de identidad.
+            Después indicarás el número de app anterior y el nuevo, y completarás
+            una verificación de identidad con documento vigente y selfie.
             {merchantLabel ? (
               <>
                 {" "}
@@ -255,7 +292,7 @@ export function CambioPerfilFlow({
             <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
               Datos de tus apps en Punto Pago
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            <p className="mt-2 text-justify text-sm leading-relaxed text-slate-600 hyphens-auto">
               Los datos del app anterior se migrarán al número nuevo. Indica ambos
               números; por defecto el país es Panamá (+507) y puedes cambiar el
               país en cada campo si aplica. Recuerda:{" "}
@@ -271,6 +308,7 @@ export function CambioPerfilFlow({
             onCountryIso={setOldCountryIso}
             nationalDigits={oldNational}
             onNationalDigits={setOldNational}
+            formatOk={oldFormatOk}
           />
 
           <AppNumberField
@@ -281,6 +319,8 @@ export function CambioPerfilFlow({
             onCountryIso={setNewCountryIso}
             nationalDigits={newNational}
             onNationalDigits={setNewNational}
+            formatOk={newFormatOk && !duplicateNumbers}
+            duplicateError={duplicateNumbers}
           />
 
           {error ? (
@@ -299,69 +339,10 @@ export function CambioPerfilFlow({
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition hover:brightness-[1.03] active:scale-[0.99] sm:min-w-[200px]"
+              disabled={!canContinueApps}
+              className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/25 ring-1 ring-white/20 transition enabled:hover:brightness-[1.03] enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[200px]"
             >
               Continuar
-            </button>
-          </div>
-        </form>
-      )}
-
-      {step === "code" && (
-        <form className="space-y-4" onSubmit={onSubmitCode}>
-          <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Código en tu app Punto Pago
-          </h1>
-          <p className="text-sm text-slate-600">
-            Abre la aplicación Punto Pago y usa el{" "}
-            <strong>mismo código de verificación que ves al iniciar sesión</strong>
-            . Aquí no te enviamos un mensaje nuevo: solo confirmas que autorizas
-            la migración de{" "}
-            <span className="font-mono font-medium text-slate-800">
-              {oldE164}
-            </span>{" "}
-            a{" "}
-            <span className="font-mono font-medium text-slate-800">
-              {newE164}
-            </span>
-            .
-          </p>
-          <input
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={CODE_LEN}
-            value={code}
-            onChange={(ev) =>
-              setCode(ev.target.value.replace(/\D/g, "").slice(0, CODE_LEN))
-            }
-            className="w-full rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-center font-mono text-2xl tracking-[0.35em] text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none ring-0 transition focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25"
-            placeholder="······"
-            aria-label="Código de verificación de la app Punto Pago"
-          />
-          {error ? (
-            <p className="text-sm font-medium text-red-600" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setStep("apps");
-                setCode("");
-                setError(null);
-                notifyParent({ type: "verification_cancelled" });
-              }}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Volver y editar números
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmitCode}
-              className="rounded-xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#4749B6]/20 ring-1 ring-white/15 transition enabled:hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Verificar
             </button>
           </div>
         </form>
@@ -373,9 +354,16 @@ export function CambioPerfilFlow({
             Verificación de identidad
           </h1>
           <p className="text-sm text-slate-600">
-            Ya confirmaste la migración entre {oldE164} y {newE164}. Falta un
-            último paso: validar tu identidad con documento y selfie para
-            completar el cambio de perfil.
+            Registraste la migración de{" "}
+            <span className="font-mono font-medium text-slate-800">
+              {oldE164}
+            </span>{" "}
+            a{" "}
+            <span className="font-mono font-medium text-slate-800">
+              {newE164}
+            </span>
+            . Pulsa el botón e inicia la verificación en pantalla (documento
+            vigente y selfie) para completar el cambio de perfil.
           </p>
           <ProfileMetamapButton
             metadata={metamapMetadata}
@@ -385,15 +373,22 @@ export function CambioPerfilFlow({
           <button
             type="button"
             onClick={() => {
-              setStep("code");
+              setStep("apps");
               setError(null);
-              notifyParent({ type: "metamap_back_to_otp" });
+              notifyParent({ type: "metamap_back_to_apps" });
             }}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            Volver al código de la app
+            Volver y editar números
           </button>
         </div>
+      )}
+
+      {step === "analyzing" && (
+        <MigrationAnalysisPending
+          oldPhoneE164={oldE164}
+          newPhoneE164={newE164}
+        />
       )}
 
       {step === "done" && (

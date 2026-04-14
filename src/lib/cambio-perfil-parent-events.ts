@@ -1,0 +1,40 @@
+/**
+ * Integración con la ventana padre (iframe): `postMessage`
+ * con `source: "punto-pago-cambio-perfil"` y `type` + payload.
+ *
+ * ## Punto principal para backend (otro ingeniero)
+ *
+ * **`metamap_verification_submitted`** — Se emite cuando el usuario termina el
+ * flujo en el SDK de MetaMap y ya existen `verificationId` e `identityId`.
+ * Aquí el backend debe, entre otras cosas:
+ * - Tomar el **número de app anterior** (`oldPhoneE164`) y comprobar si existe
+ *   y si está asociado a un **identity id** coherente con la verificación.
+ * - Registrar / correlacionar con MetaMap según vuestra API.
+ *
+ * Payload típico:
+ * `verificationId`, `identityId`, `oldPhoneE164`, `newPhoneE164`,
+ * `oldCountryIso`, `newCountryIso`, y opcionalmente `merchantLabel` si vino en
+ * la URL del embed.
+ *
+ * ## Flujo UI actual (demo)
+ *
+ * Tras ese evento, la UI muestra una barra de análisis durante
+ * `MIGRATION_ANALYSIS_UI_MS` (60s). En producción podéis sustituir esa espera
+ * por la respuesta real del backend y cerrar el flujo cuando corresponda.
+ *
+ * **`migration_analysis_started`** — Comienza la fase de “análisis” en pantalla
+ * (misma ventana de tiempo que arriba). Payload incluye `estimatedDurationMs`.
+ *
+ * **`metamap_finished`** y **`verification_succeeded`** — Se emiten al
+ * finalizar la fase de análisis (hoy, al cumplirse el temporizador de demo).
+ *
+ * **`migration_analysis_complete`** — Fin de la fase de análisis en UI; payload
+ * incluye `outcome` (p. ej. `"success"`). En producción podéis emitir errores
+ * u otros valores cuando el backend responda antes que el temporizador.
+ *
+ * Otros eventos existentes: `flow_ready`, `apps_submitted`, `verification_started`,
+ * `metamap_started`, `metamap_back_to_apps`, etc.
+ */
+
+/** Tiempo de la barra “analizando información” en la UI (demo). Producción: alinear con backend o eliminar. */
+export const MIGRATION_ANALYSIS_UI_MS = 60_000;

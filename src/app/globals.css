@@ -183,3 +183,19 @@ body {
     animation: none !important;
   }
 }
+
+/* Barra de “análisis” post-MetaMap: `--pp-analysis-ms` en el track (inline desde React). */
+@keyframes pp-migration-analysis-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.pp-migration-analysis-bar {
+  width: 0%;
+  animation: pp-migration-analysis-fill var(--pp-analysis-ms, 60s) linear
+    forwards;
+}

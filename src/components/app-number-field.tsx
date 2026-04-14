@@ -2,11 +2,32 @@
 
 import { DIAL_COUNTRIES, type DialCountry } from "@/lib/dial-countries";
 
-const inputClass =
-  "min-w-0 flex-1 rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-sm text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none transition focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25";
-
 const selectClass =
   "max-w-[min(52%,11rem)] shrink-0 rounded-xl border border-slate-200/90 bg-slate-50/90 py-2.5 pl-2 pr-7 text-xs font-medium text-slate-800 outline-none focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25 sm:text-sm";
+
+function FormatOkIcon() {
+  return (
+    <span
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-600/20 ring-1 ring-emerald-400/30"
+      title="Formato válido"
+      role="img"
+      aria-label="Formato válido"
+    >
+      <svg
+        viewBox="0 0 20 20"
+        className="h-4 w-4"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path
+          fillRule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </span>
+  );
+}
 
 type Props = {
   id: string;
@@ -16,6 +37,10 @@ type Props = {
   onCountryIso: (iso: string) => void;
   nationalDigits: string;
   onNationalDigits: (v: string) => void;
+  /** Número nacional cumple longitud mín/máx y se muestra el gancho verde */
+  formatOk?: boolean;
+  /** Mismo número que el otro campo: borde rojo (típicamente el campo “nuevo”) */
+  duplicateError?: boolean;
 };
 
 export function AppNumberField({
@@ -26,7 +51,20 @@ export function AppNumberField({
   onCountryIso,
   nationalDigits,
   onNationalDigits,
+  formatOk = false,
+  duplicateError = false,
 }: Props) {
+  const inputClass = [
+    "min-w-0 flex-1 rounded-xl border bg-white px-3 py-2.5 text-sm text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none transition",
+    duplicateError
+      ? "border-red-400 ring-2 ring-red-200 focus:border-red-500 focus:ring-red-200"
+      : "border-slate-200/90 focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25",
+  ].join(" ");
+
+  const selectStateClass = duplicateError
+    ? "border-red-400 ring-2 ring-red-200 focus:border-red-500 focus:ring-red-200"
+    : "";
+
   return (
     <div className="space-y-1.5">
       <label htmlFor={`${id}-tel`} className="block">
@@ -41,10 +79,11 @@ export function AppNumberField({
         <div className="flex flex-wrap items-stretch gap-2 sm:flex-nowrap">
           <select
             id={`${id}-country`}
-            className={selectClass}
+            className={`${selectClass} ${selectStateClass}`}
             value={countryIso}
             onChange={(e) => onCountryIso(e.target.value)}
             aria-label={`País o prefijo para ${label}`}
+            aria-invalid={duplicateError || undefined}
           >
             {DIAL_COUNTRIES.map((c: DialCountry) => (
               <option key={c.iso} value={c.iso}>
@@ -52,19 +91,28 @@ export function AppNumberField({
               </option>
             ))}
           </select>
-          <input
-            id={`${id}-tel`}
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            className={inputClass}
-            placeholder="Número de app"
-            value={nationalDigits}
-            onChange={(e) =>
-              onNationalDigits(e.target.value.replace(/\D/g, "").slice(0, 15))
-            }
-          />
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <input
+              id={`${id}-tel`}
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              className={inputClass}
+              placeholder="Número de app"
+              value={nationalDigits}
+              onChange={(e) =>
+                onNationalDigits(e.target.value.replace(/\D/g, "").slice(0, 15))
+              }
+              aria-invalid={duplicateError || undefined}
+            />
+            {formatOk ? <FormatOkIcon /> : null}
+          </div>
         </div>
+        {duplicateError ? (
+          <span className="mt-1 block text-xs font-medium text-red-600">
+            Debe ser distinto al número de app anterior.
+          </span>
+        ) : null}
       </label>
     </div>
   );
