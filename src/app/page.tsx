@@ -1,10 +1,10 @@
 import { PpAppChrome } from "@/components/pp-app-chrome";
-import { ProfileSecurityWidget } from "@/components/profile-security-widget";
+import { CambioPerfilFlow } from "@/components/cambio-perfil-flow";
 
 export default function Home() {
   return (
     <PpAppChrome>
-      <ProfileSecurityWidget />
+      <CambioPerfilFlow />
     </PpAppChrome>
   );
 }

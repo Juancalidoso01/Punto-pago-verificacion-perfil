@@ -1,9 +1,9 @@
+import { CambioPerfilFlow } from "@/components/cambio-perfil-flow";
 import { PpAmbient } from "@/components/pp-ambient";
-import { ProfileSecurityWidget } from "@/components/profile-security-widget";
 
 type SearchParams = Promise<{ label?: string | string[] }>;
 
-export default async function WidgetPage({
+export default async function EmbedPage({
   searchParams,
 }: {
   searchParams: SearchParams;
@@ -21,7 +21,7 @@ export default async function WidgetPage({
     <div className="pp-page-bg relative min-h-screen">
       <PpAmbient />
       <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4 sm:p-6">
-        <ProfileSecurityWidget compact merchantLabel={merchantLabel} />
+        <CambioPerfilFlow compact merchantLabel={merchantLabel} />
       </div>
     </div>
   );

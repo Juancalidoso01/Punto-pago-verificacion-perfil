@@ -1,4 +1,4 @@
-/** País + prefijo telefónico (sin +) para el selector del widget. */
+/** País + prefijo telefónico (sin +) para el selector de número. */
 
 export type DialCountry = {
   iso: string;

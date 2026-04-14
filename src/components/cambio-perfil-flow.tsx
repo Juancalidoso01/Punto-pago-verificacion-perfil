@@ -22,11 +22,14 @@ const CODE_LEN = 6;
 const MIN_NATIONAL = 6;
 const MAX_NATIONAL = 15;
 
+/** Identificador en postMessage para la app contenedora (iframe). */
+const PARENT_MESSAGE_SOURCE = "punto-pago-cambio-perfil";
+
 function notifyParent(payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   try {
     window.parent?.postMessage(
-      { source: "punto-pago-perfil-seguridad", ...payload },
+      { source: PARENT_MESSAGE_SOURCE, ...payload },
       "*",
     );
   } catch {
@@ -34,10 +37,11 @@ function notifyParent(payload: Record<string, unknown>) {
   }
 }
 
-export function ProfileSecurityWidget({
+export function CambioPerfilFlow({
   compact = false,
   merchantLabel,
 }: {
+  /** Vista compacta para incrustar en iframe */
   compact?: boolean;
   merchantLabel?: string | null;
 }) {
@@ -49,7 +53,7 @@ export function ProfileSecurityWidget({
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    notifyParent({ type: "widget_ready" });
+    notifyParent({ type: "flow_ready" });
   }, []);
 
   useEffect(() => {
@@ -71,7 +75,7 @@ export function ProfileSecurityWidget({
 
   const metamapMetadata = useMemo((): Record<string, string> => {
     const m: Record<string, string> = {
-      source: "punto-pago-verificacion-perfil",
+      source: "punto-pago-cambio-perfil",
       oldPhoneE164: oldE164,
       newPhoneE164: newE164,
       oldCountryIso,

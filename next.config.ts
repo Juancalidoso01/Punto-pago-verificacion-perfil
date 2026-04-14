@@ -1,15 +1,35 @@
 import type { NextConfig } from "next";
 
+const frameAncestorsCsp =
+  "frame-ancestors 'self' https://puntopago.net https://*.puntopago.net http://localhost:* https://localhost:*;";
+
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/widget",
+        destination: "/embed",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
+      {
+        source: "/embed",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: frameAncestorsCsp,
+          },
+        ],
+      },
       {
         source: "/widget",
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "frame-ancestors 'self' https://puntopago.net https://*.puntopago.net http://localhost:* https://localhost:*;",
+            value: frameAncestorsCsp,
           },
         ],
       },

@@ -13,7 +13,7 @@ type PpAppChromeProps = {
 
 export function PpAppChrome({
   children,
-  subtitle = "Verificación de seguridad · Cambio de perfil",
+  subtitle = "Cambio de perfil · Migración de número",
   headerDetail,
 }: PpAppChromeProps) {
   return (
@@ -80,7 +80,7 @@ export function PpAppChrome({
         <p>
           <span className="font-medium text-slate-600">Grupo Punto Pago</span>
           {" · "}
-          Verificación para cambio de perfil.{" "}
+          Cambio de perfil y migración de número.{" "}
           <a
             href="https://puntopago.net/"
             target="_blank"
