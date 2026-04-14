@@ -1,40 +1,54 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { parseSafeMetamapCallbackId } from "@/lib/embed-security";
 import { getMetamapPublicConfig } from "@/lib/metamap-public-config";
 
-const METAMAP_SCRIPT_SRC = "https://web-button.metamap.com/button.js";
+/** Integración oficial Mati (Direct Link / Web SDK). */
+const MATI_SCRIPT_SRC = "https://web-button.getmati.com/button.js";
+
+const MATI_BUTTON_ID = "mati_button";
 
 type Props = {
-  /** Metadatos enviados a MetaMap (serializados en el atributo metadata) */
-  metadata: Record<string, string>;
+  /** Obligatorio: identidad creada en Mati antes de abrir el flujo. */
+  identityId: string;
   onComplete: (ids: { verificationId: string; identityId: string }) => void;
   onUserStartedSdk?: () => void;
 };
 
+/** Eventos del web component (documentación MetaMap / Mati). */
+const FINISH_EVENTS = [
+  "metamap:userFinishedSdk",
+  "mati:userFinishedSdk",
+] as const;
+const START_EVENTS = ["metamap:userStartedSdk", "mati:userStartedSdk"] as const;
+const EXIT_EVENTS = ["metamap:exitedSdk", "mati:exitedSdk"] as const;
+
 export function ProfileMetamapButton({
-  metadata,
+  identityId,
   onComplete,
   onUserStartedSdk,
 }: Props) {
   const cfg = getMetamapPublicConfig();
   const [scriptReady, setScriptReady] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-
-  const metadataJson = useMemo(() => JSON.stringify(metadata), [metadata]);
+  const lastVerificationRef = useRef<string | null>(null);
 
   const attachListeners = useCallback(
     (el: HTMLElement) => {
-      const onStart = () => {
+      const setModal = (open: boolean) => {
         (window as unknown as { __ppMetamapModalOpen?: boolean }).__ppMetamapModalOpen =
-          true;
+          open;
+      };
+
+      const onStart = () => {
+        setModal(true);
         onUserStartedSdk?.();
       };
+
       const onFinish = (e: Event) => {
-        (window as unknown as { __ppMetamapModalOpen?: boolean }).__ppMetamapModalOpen =
-          false;
+        setModal(false);
         const d = (e as CustomEvent<Record<string, unknown>>).detail ?? {};
         const verificationRaw = String(
           (d as { verificationId?: string }).verificationId ??
@@ -47,35 +61,55 @@ export function ProfileMetamapButton({
             "",
         );
         const verificationId = parseSafeMetamapCallbackId(verificationRaw);
-        const identityId = parseSafeMetamapCallbackId(identityRaw) ?? "";
-        if (verificationId) {
-          onComplete({ verificationId, identityId });
+        const identityOut = parseSafeMetamapCallbackId(identityRaw) ?? identityId;
+        if (!verificationId) return;
+        if (lastVerificationRef.current === verificationId) return;
+        lastVerificationRef.current = verificationId;
+        onComplete({ verificationId, identityId: identityOut });
+      };
+
+      const onExit = () => {
+        setModal(false);
+      };
+
+      for (const ev of START_EVENTS) {
+        el.addEventListener(ev, onStart);
+      }
+      for (const ev of FINISH_EVENTS) {
+        el.addEventListener(ev, onFinish);
+      }
+      for (const ev of EXIT_EVENTS) {
+        el.addEventListener(ev, onExit);
+      }
+
+      return () => {
+        for (const ev of START_EVENTS) {
+          el.removeEventListener(ev, onStart);
+        }
+        for (const ev of FINISH_EVENTS) {
+          el.removeEventListener(ev, onFinish);
+        }
+        for (const ev of EXIT_EVENTS) {
+          el.removeEventListener(ev, onExit);
         }
       };
-      const onExit = () => {
-        (window as unknown as { __ppMetamapModalOpen?: boolean }).__ppMetamapModalOpen =
-          false;
-      };
-      el.addEventListener("metamap:userStartedSdk", onStart);
-      el.addEventListener("metamap:userFinishedSdk", onFinish);
-      el.addEventListener("metamap:exitedSdk", onExit);
-      return () => {
-        el.removeEventListener("metamap:userStartedSdk", onStart);
-        el.removeEventListener("metamap:userFinishedSdk", onFinish);
-        el.removeEventListener("metamap:exitedSdk", onExit);
-      };
     },
-    [onComplete, onUserStartedSdk],
+    [identityId, onComplete, onUserStartedSdk],
   );
+
+  useEffect(() => {
+    lastVerificationRef.current = null;
+  }, [identityId]);
 
   useEffect(() => {
     if (!scriptReady || !wrapRef.current) return;
     const host = wrapRef.current;
     host.replaceChildren();
-    const btn = document.createElement("metamap-button");
+    const btn = document.createElement("mati-button");
+    btn.id = MATI_BUTTON_ID;
     btn.setAttribute("clientid", cfg.clientId);
     btn.setAttribute("flowId", cfg.flowId);
-    btn.setAttribute("metadata", metadataJson);
+    btn.setAttribute("identityId", identityId);
     btn.className =
       "absolute inset-0 z-20 min-h-14 min-w-0 w-full cursor-pointer opacity-0 sm:min-h-[52px]";
     btn.setAttribute(
@@ -88,12 +122,12 @@ export function ProfileMetamapButton({
       detach();
       host.replaceChildren();
     };
-  }, [scriptReady, cfg.clientId, cfg.flowId, metadataJson, attachListeners]);
+  }, [scriptReady, cfg.clientId, cfg.flowId, identityId, attachListeners]);
 
   return (
     <div className="space-y-3">
       <Script
-        src={METAMAP_SCRIPT_SRC}
+        src={MATI_SCRIPT_SRC}
         strategy="afterInteractive"
         onLoad={() => setScriptReady(true)}
       />

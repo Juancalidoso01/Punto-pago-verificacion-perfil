@@ -94,51 +94,6 @@ export function safeDecodeURIComponent(value: string): string {
   }
 }
 
-const METAMAP_METADATA_KEYS = new Set([
-  "source",
-  "oldPhoneE164",
-  "newPhoneE164",
-  "oldCountryIso",
-  "newCountryIso",
-  "merchantLabel",
-]);
-
-const E164_RE = /^\+[1-9]\d{5,14}$/;
-const ISO_COUNTRY_RE = /^[A-Z]{2}$/;
-const FIXED_SOURCE = "punto-pago-cambio-perfil";
-
-/**
- * Solo claves esperadas y valores con forma válida (defensa ante estados raros o futuros cambios).
- */
-export function buildSafeMetamapMetadata(
-  raw: Record<string, string>,
-): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(raw)) {
-    if (!METAMAP_METADATA_KEYS.has(k)) continue;
-    const val = v.replace(/\0/g, "").trim();
-    if (k === "source") {
-      if (val === FIXED_SOURCE) out[k] = val;
-      continue;
-    }
-    if (k === "oldPhoneE164" || k === "newPhoneE164") {
-      if (E164_RE.test(val)) out[k] = val;
-      continue;
-    }
-    if (k === "oldCountryIso" || k === "newCountryIso") {
-      const u = val.toUpperCase();
-      if (ISO_COUNTRY_RE.test(u)) out[k] = u;
-      continue;
-    }
-    if (k === "merchantLabel") {
-      const c = clampEmbedText(val, EMBED_MERCHANT_LABEL_MAX_LENGTH);
-      if (c) out[k] = c;
-    }
-  }
-  if (!out.source) out.source = FIXED_SOURCE;
-  return out;
-}
-
 /** IDs devueltos por el SDK MetaMap en el evento de finalización. */
 const METAMAP_CALLBACK_ID_RE = /^[a-zA-Z0-9_-]{1,128}$/;
 

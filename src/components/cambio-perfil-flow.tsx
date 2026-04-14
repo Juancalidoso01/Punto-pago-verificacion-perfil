@@ -18,11 +18,11 @@ import {
 } from "@/lib/cambio-perfil-errors";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
-  buildSafeMetamapMetadata,
   clampEmbedText,
   isAllowedParentMessageOrigin,
   resolvePostMessageTargetOriginForSend,
 } from "@/lib/embed-security";
+import { resolveMatiIdentityId } from "@/lib/metamap-public-config";
 import {
   DEFAULT_DIAL_ISO,
   findDialCountry,
@@ -53,10 +53,13 @@ function notifyParent(payload: Record<string, unknown>) {
 export function CambioPerfilFlow({
   compact = false,
   merchantLabel,
+  matiIdentityId: matiIdentityIdProp,
 }: {
   /** Vista compacta para incrustar en iframe */
   compact?: boolean;
   merchantLabel?: string | null;
+  /** Identidad Mati (hex). Si no se pasa, se usa solo `NEXT_PUBLIC_METAMAP_IDENTITY_ID` en build. */
+  matiIdentityId?: string | null;
 }) {
   const [step, setStep] = useState<Step>("notice");
   const [oldCountryIso, setOldCountryIso] = useState(DEFAULT_DIAL_ISO);
@@ -129,18 +132,10 @@ export function CambioPerfilFlow({
     [newDial, newNational],
   );
 
-  const metamapMetadata = useMemo((): Record<string, string> => {
-    const m: Record<string, string> = {
-      source: "punto-pago-cambio-perfil",
-      oldPhoneE164: oldE164,
-      newPhoneE164: newE164,
-      oldCountryIso,
-      newCountryIso,
-    };
-    const label = (merchantLabel ?? "").trim();
-    if (label) m.merchantLabel = label;
-    return buildSafeMetamapMetadata(m);
-  }, [oldE164, newE164, oldCountryIso, newCountryIso, merchantLabel]);
+  const matiIdentityId = useMemo(
+    () => resolveMatiIdentityId(matiIdentityIdProp ?? null),
+    [matiIdentityIdProp],
+  );
 
   const oldLen = onlyDigits(oldNational).length;
   const newLen = onlyDigits(newNational).length;
@@ -408,11 +403,33 @@ export function CambioPerfilFlow({
             el botón de abajo y sigue los pasos en pantalla (incluye una{" "}
             <strong>foto tipo selfie</strong>).
           </p>
-          <ProfileMetamapButton
-            metadata={metamapMetadata}
-            onComplete={onMetamapComplete}
-            onUserStartedSdk={onMetamapUserStarted}
-          />
+          {matiIdentityId ? (
+            <ProfileMetamapButton
+              identityId={matiIdentityId}
+              onComplete={onMetamapComplete}
+              onUserStartedSdk={onMetamapUserStarted}
+            />
+          ) : (
+            <div
+              className="rounded-xl border border-amber-200/90 bg-amber-50/90 p-4 text-sm text-amber-950"
+              role="alert"
+            >
+              <p className="font-semibold">Configuración de verificación</p>
+              <p className="mt-2 leading-relaxed">
+                Falta el <strong>identityId</strong> de Mati. El sistema que
+                incrusta esta página debe crear la identidad en Mati y pasarla en
+                la URL del embed (por ejemplo{" "}
+                <code className="rounded bg-amber-100/80 px-1 font-mono text-xs">
+                  ?identityId=…
+                </code>
+                ) o definir{" "}
+                <code className="rounded bg-amber-100/80 px-1 font-mono text-xs">
+                  NEXT_PUBLIC_METAMAP_IDENTITY_ID
+                </code>{" "}
+                solo en entornos de prueba.
+              </p>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => {

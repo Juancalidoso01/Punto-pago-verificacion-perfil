@@ -14,7 +14,8 @@
  * Payload típico:
  * `verificationId`, `identityId`, `oldPhoneE164`, `newPhoneE164`,
  * `oldCountryIso`, `newCountryIso`, y opcionalmente `merchantLabel` si vino en
- * la URL del embed.
+ * la URL del embed. El Web SDK Mati requiere **`identityId`** en `/embed`
+ * (`?identityId=…`) o variable `NEXT_PUBLIC_METAMAP_IDENTITY_ID` en builds de prueba.
  *
  * ## Flujo UI actual (demo)
  *
