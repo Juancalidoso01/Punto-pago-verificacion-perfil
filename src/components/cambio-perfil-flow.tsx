@@ -328,7 +328,7 @@ export function CambioPerfilFlow({
             <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
               Datos de tus apps en Punto Pago
             </h1>
-            <p className="mt-2 text-justify text-sm leading-relaxed text-slate-600 hyphens-auto">
+            <p className="mt-2 text-left text-sm leading-relaxed text-slate-600 hyphens-none text-pretty sm:hyphens-auto sm:text-justify">
               Los datos del app anterior se migrarán al número nuevo. Indica ambos
               números; por defecto el país es Panamá (+507) y puedes cambiar el
               país en cada campo si aplica. Recuerda:{" "}
