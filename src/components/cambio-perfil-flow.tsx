@@ -9,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { AppNumberField } from "@/components/app-number-field";
+import { CambioPerfilFlowGuide } from "@/components/cambio-perfil-flow-guide";
 import { MigrationAnalysisPending } from "@/components/migration-analysis-pending";
 import { ProfileMetamapButton } from "@/components/profile-metamap-button";
 import {
@@ -266,7 +267,7 @@ export function CambioPerfilFlow({
   return (
     <div className={cardClass}>
       {step === "notice" && (
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
             Cambio de número de app
           </h1>
@@ -302,6 +303,8 @@ export function CambioPerfilFlow({
               para cambiar de número con frecuencia.
             </p>
           </div>
+
+          <CambioPerfilFlowGuide compact={compact} />
 
           <p className="text-sm leading-relaxed text-slate-600">
             Después indicarás el número de app anterior y el nuevo, y completarás

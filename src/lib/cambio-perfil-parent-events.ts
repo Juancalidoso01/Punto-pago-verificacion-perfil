@@ -66,6 +66,12 @@
  *
  * También existen códigos de validación en cliente: `INVALID_NUMBER_FORMAT`,
  * `DUPLICATE_APP_NUMBERS` (normalmente no hace falta enviarlos desde el host).
+ *
+ * ## Guía paso a paso (producto / integradores)
+ *
+ * En la UI del paso inicial se muestra una guía interactiva alineada con este
+ * contrato; el contenido estructurado vive en `cambio-perfil-flow-guide.ts` y el
+ * componente `CambioPerfilFlowGuide`.
  */
 
 /** Tiempo de la barra “analizando información” en la UI (demo). Producción: alinear con backend o eliminar. */
