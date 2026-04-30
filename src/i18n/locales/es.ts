@@ -102,7 +102,7 @@ export const esMessages: AppMessages = {
       stepNLabel: "Paso {{n}}",
       backendCardTitle: "Integración backend · Mati / MetaMap",
       backendCardDesc:
-        "HTML, postMessage y ejemplo de correlación con la API de verificaciones usando **identityId** y **verificationId**.",
+        "Contrato **iframe ↔ host ↔ backend**: validación del número anterior, **identityId** antes del SDK, eventos **`postMessage`** y comprobación de **verificationId** contra la API de Mati.",
       backendCardCta: "Abrir documentación técnica",
     },
     pasoShell: {
@@ -282,32 +282,32 @@ export const esMessages: AppMessages = {
     },
   },
   backendDoc: {
-    title: "Integración backend: número viejo, identityId y MetaMap",
+    title: "Integración backend del cambio de perfil (MetaMap / Mati)",
     intro:
-      "Esta página resume lo que debe implementar el equipo de **backend** antes de que el widget Mati (MetaMap) pueda concluir si existe una verificación válida. Las zonas resaltadas en los ejemplos son las piezas críticas.",
+      "Aquí se describe el **contrato** entre el **iframe del widget**, la **app contenedora** y vuestro **backend**: qué validar en cuanto el usuario confirma los números, cómo obtener y exponer **identityId** antes del SDK, qué mensaje esperar al cerrar Mati y cómo **confirmar** la verificación en servidor antes de cerrar el trámite. En los ejemplos, lo resaltado marca datos que no deben improvisarse en producción.",
     backGuia: "← Índice de la guía",
     backFlow: "← Volver al flujo",
-    s1Title: "1) Validar el número de app anterior y resolver identityId",
+    s1Title: "1) Tras los números: validar negocio y crear o recuperar identidad en Mati",
     s1Body:
-      "Cuando el usuario envía los números (`apps_submitted`), vuestro backend debe comprobar que el **número anterior** existe, tiene perfil y cumple políticas. Si todo es correcto, **creáis o recuperáis** una identidad en Mati y obtenéis el **identityId** que luego pasáis al iframe (`?identityId=…`). Sin ese ID, el SDK de Mati no puede abrir el flujo.",
-    codePrepareTitle: "Ejemplo (Node / TypeScript): preparar identidad antes del iframe",
-    codePrepare: `// Tras validar oldPhoneE164 en vuestro dominio:
+      "Al enviar el formulario de números, el iframe emite **`apps_submitted`**. Ese evento debe disparar en backend la comprobación del **número anterior** (existencia, perfil Punto Pago, políticas como el límite de un cambio cada 2 meses). Si todo es correcto, **creáis o recuperáis** la identidad en Mati y obtenéis el **identityId** que debe llegar al iframe en **`?identityId=…`** (o equivalente) **antes** de que el usuario abra el SDK. Sin ese valor, Mati no puede iniciar el flujo.",
+    codePrepareTitle: "Ejemplo: identidad lista antes de fijar la URL del iframe",
+    codePrepare: `// Tras validar oldPhoneE164 y reglas de negocio en servidor:
 const [[HL]]identityId[[/HL]] = await mati.createOrGetIdentity({ externalId: oldPhoneE164 });
-// Redirigir / actualizar src del iframe:
+// Actualizar src del iframe (opcional ?label= para texto comercial):
 // /embed?label=...&identityId=\${encodeURIComponent(identityId)}`,
-    s2Title: "2) Cargar el embed con identityId",
+    s2Title: "2) Cargar el embed con el identityId correcto por sesión",
     s2Body:
-      "El componente `mati-button` del SDK usa **clientid**, **flowId** y **identityId**. El **identityId** debe ser el de la identidad asociada al usuario / al número viejo validado.",
+      "El widget usa el web component oficial **`mati-button`**. Los atributos **clientid** y **flowId** suelen ser fijos por entorno (build); lo que debe variar por usuario o intento es **identityId**: siempre el que devolvió Mati para la identidad ligada al **número anterior ya validado** en vuestro dominio.",
     codeIframeTitle: "HTML mínimo del botón Mati (atributos relevantes)",
     codeIframe: `<mati-button
   clientid="[[HL]]YOUR_CLIENT_ID[[/HL]]"
   flowId="[[HL]]YOUR_FLOW_ID[[/HL]]"
   [[HL]]identityId[[/HL]]="[[HL]]<hex de Mati devuelto por vuestro backend>[[/HL]]"
 ></mati-button>`,
-    s3Title: "3) Escuchar el cierre de Mati en el padre",
+    s3Title: "3) Cierre exitoso de Mati: escuchar y persistir `metamap_verification_submitted`",
     s3Body:
-      "El widget emite `metamap_verification_submitted` al padre con **verificationId** e **identityId**. Ese es el momento en que el backend debe **persistir** la correlación número viejo → verificación y consultar a Mati si hace falta.",
-    codePostMessageTitle: "postMessage desde el iframe (referencia)",
+      "Cuando el usuario termina el SDK, el widget envía al padre **`metamap_verification_submitted`** con **verificationId**, **identityId**, ambos E.164 y datos opcionales. Es el **punto principal** para grabar la migración pendiente, correlacionar sesión y, si aplica, consultar Mati. Los mensajes posteriores (`migration_analysis_*`, `verification_succeeded`, etc.) completan la narrativa de la demo; el listado y los payloads están en **`cambio-perfil-parent-events.ts`**. En el host, conviene validar siempre **`origin`**, **`source`** y la **forma** del mensaje antes de actuar.",
+    codePostMessageTitle: "Forma del mensaje (referencia; no sustituye validación en el host)",
     codePostMessage: `window.parent.postMessage({
   source: "punto-pago-cambio-perfil",
   type: "[[HL]]metamap_verification_submitted[[/HL]]",
@@ -315,19 +315,19 @@ const [[HL]]identityId[[/HL]] = await mati.createOrGetIdentity({ externalId: old
   [[HL]]identityId[[/HL]]: "<id de identidad>",
   oldPhoneE164: "+507...",
   newPhoneE164: "+507...",
-}, targetOrigin);`,
-    s4Title: "4) Comprobar en Mati si la verificación existe",
+}, targetOrigin); // targetOrigin explícito, nunca "*" en producción`,
+    s4Title: "4) Confirmar en Mati antes de dar por cerrada la migración",
     s4Body:
-      "Con **verificationId** (y opcionalmente **identityId**) llamáis a la API de MetaMap / Mati (según vuestra versión del producto: REST v2, webhooks, etc.). Si la verificación existe y está en estado esperado, podéis concluir el flujo; si no, respondéis con error al usuario o enviáis `flow_error` al iframe.",
-    codeMatiTitle: "Ejemplo de consulta (pseudocódigo)",
+      "No basta con lo que muestra el navegador: con **verificationId** (y **identityId** como contexto) debéis obtener un **estado definitivo** en la API de MetaMap (REST, webhooks o ambos, según vuestra integración). Solo entonces actualizáis cuenta, números y registros internos. Si la verificación no existe, falla o no está lista, respondéis al usuario y podéis enviar **`flow_error`** al iframe para devolverlo al paso adecuado.",
+    codeMatiTitle: "Ejemplo de consulta (pseudocódigo; rutas según versión de API)",
     codeMati: `const v = await matiHttp.get(
   \`/v2/identities/[[HL]]\${identityId}[[/HL]]/verifications/[[HL]]\${verificationId}[[/HL]]\`
 );
 if (!v || v.status === "NOT_FOUND") {
-  // no existe o aún no está disponible
+  // aún no indexada, rechazada o no encontrada — alinear con webhooks si los usáis
 }`,
-    noteTitle: "Errores hacia el iframe",
+    noteTitle: "Errores de negocio hacia el iframe (`flow_error`)",
     noteBody:
-      "Si la validación del número viejo falla antes de Mati, el padre puede enviar `postMessage` con `source: \"punto-pago-cambio-perfil-host\"`, `type: \"flow_error\"`, `errorCode` (p. ej. `OLD_APP_NUMBER_NOT_FOUND`) y `step: \"apps\"`. Ver `cambio-perfil-errors.ts`.",
+      "Si la validación del número anterior falla **antes** de Mati, el host puede enviar al iframe `postMessage` con **`source: \"punto-pago-cambio-perfil-host\"`**, **`type: \"flow_error\"`**, un **`errorCode`** del catálogo (p. ej. **`OLD_APP_NUMBER_NOT_FOUND`**) y opcionalmente **`step`** (`\"apps\"`, `\"metamap\"`, …) para que el usuario corrija datos o reintente. Catálogo de códigos y textos: **`cambio-perfil-errors.ts`**. Tratad los mensajes del iframe como **entrada no confiable** hasta validar origen y esquema.",
   },
 };

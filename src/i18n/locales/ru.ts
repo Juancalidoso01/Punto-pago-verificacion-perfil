@@ -100,7 +100,7 @@ export const ruMessages: AppMessages = {
       stepNLabel: "Шаг {{n}}",
       backendCardTitle: "Интеграция бэкенда · Mati / MetaMap",
       backendCardDesc:
-        "HTML, postMessage и пример связи с API проверок через **identityId** и **verificationId**.",
+        "Контракт **iframe ↔ хост ↔ бэкенд**: проверка старого номера, **identityId** до SDK, события **`postMessage`** и сверка **verificationId** с API Mati.",
       backendCardCta: "Открыть техническую документацию",
     },
     pasoShell: {
@@ -268,32 +268,32 @@ export const ruMessages: AppMessages = {
     },
   },
   backendDoc: {
-    title: "Интеграция бэкенда: старый номер, identityId и MetaMap",
+    title: "Интеграция бэкенда: смена профиля и MetaMap / Mati",
     intro:
-      "Кратко о том, что должен реализовать **бэкенд**, прежде чем виджет Mati (MetaMap) сможет установить, существует ли валидная проверка. В примерах подсвечены критичные места интеграции.",
+      "Здесь описан **контракт** между **iframe виджета**, **родительским приложением** и **бэкендом**: что проверить после ввода номеров, как получить и передать **identityId** до SDK, какое сообщение означает успешное завершение Mati и как **подтвердить** проверку на сервере перед финалом миграции. Подсвеченные фрагменты — значения, которые нельзя «угадывать» в продакшене.",
     backGuia: "← К оглавлению руководства",
     backFlow: "← К потоку",
-    s1Title: "1) Проверка прежнего номера приложения и получение identityId",
+    s1Title: "1) После номеров: бизнес-проверки и создание или получение identity в Mati",
     s1Body:
-      "После отправки номеров (`apps_submitted`) бэкенд должен убедиться, что **прежний номер** существует, есть профиль и выполняются правила. При успехе **создайте или получите** идентичность в Mati и передайте **identityId** в iframe (`?identityId=…`). Без него SDK Mati не откроется.",
-    codePrepareTitle: "Пример (Node / TypeScript): подготовка идентичности до iframe",
-    codePrepare: `// После проверки oldPhoneE164 в вашем домене:
+      "При отправке формы iframe шлёт **`apps_submitted`**. По этому событию бэкенд проверяет **прежний номер** (существование, профиль Punto Pago, правила вроде лимита раз в 2 месяца). При успехе **создайте или получите** identity в Mati и передайте **identityId** в iframe через **`?identityId=…`** (или аналог) **до** открытия SDK. Без этого Mati не запустится.",
+    codePrepareTitle: "Пример: identity готов до установки URL iframe",
+    codePrepare: `// После проверки oldPhoneE164 и бизнес-правил на сервере:
 const [[HL]]identityId[[/HL]] = await mati.createOrGetIdentity({ externalId: oldPhoneE164 });
-// Редирект / обновление src iframe:
+// Обновить src iframe (опционально ?label= для подписи мерчанта):
 // /embed?label=...&identityId=\${encodeURIComponent(identityId)}`,
-    s2Title: "2) Загрузка embed с identityId",
+    s2Title: "2) Загрузить embed с корректным identityId для сессии",
     s2Body:
-      "Компонент `mati-button` использует **clientid**, **flowId** и **identityId**. **identityId** должен соответствовать идентичности пользователя / проверенному старому номеру.",
+      "Виджет использует официальный веб-компонент **`mati-button`**. **clientid** и **flowId** обычно фиксированы для окружения (сборка); по пользователю или попытке меняется **identityId** — всегда значение Mati для identity, привязанной к **уже проверенному** прежнему номеру в вашем домене.",
     codeIframeTitle: "Минимальный HTML кнопки Mati (важные атрибуты)",
     codeIframe: `<mati-button
   clientid="[[HL]]YOUR_CLIENT_ID[[/HL]]"
   flowId="[[HL]]YOUR_FLOW_ID[[/HL]]"
   [[HL]]identityId[[/HL]]="[[HL]]<hex от вашего бэкенда>[[/HL]]"
 ></mati-button>`,
-    s3Title: "3) Ожидание завершения Mati в родителе",
+    s3Title: "3) Успешное завершение Mati: обработать `metamap_verification_submitted`",
     s3Body:
-      "Виджет шлёт родителю `metamap_verification_submitted` с **verificationId** и **identityId**. В этот момент бэкенд должен **сохранить** связь старый номер → проверка и при необходимости запросить Mati.",
-    codePostMessageTitle: "postMessage из iframe (справка)",
+      "После закрытия SDK виджет отправляет родителю **`metamap_verification_submitted`** с **verificationId**, **identityId**, обоими E.164 и опциональными полями. Это **основная точка** для сохранения ожидающей миграции, корреляции сессии и при необходимости запроса к Mati. Дальнейшие сообщения (`migration_analysis_*`, `verification_succeeded` и др.) дополняют демо-сценарий; полный список и поля — в **`cambio-perfil-parent-events.ts`**. На стороне хоста всегда проверяйте **`origin`**, **`source`** и **структуру** сообщения.",
+    codePostMessageTitle: "Форма сообщения (справка; валидация на хосте обязательна)",
     codePostMessage: `window.parent.postMessage({
   source: "punto-pago-cambio-perfil",
   type: "[[HL]]metamap_verification_submitted[[/HL]]",
@@ -301,19 +301,19 @@ const [[HL]]identityId[[/HL]] = await mati.createOrGetIdentity({ externalId: old
   [[HL]]identityId[[/HL]]: "<id идентичности>",
   oldPhoneE164: "+507...",
   newPhoneE164: "+507...",
-}, targetOrigin);`,
-    s4Title: "4) Проверка в Mati, существует ли verification",
+}, targetOrigin); // явный targetOrigin — в проде не используйте "*"`,
+    s4Title: "4) Подтвердить в Mati перед финалом миграции",
     s4Body:
-      "С **verificationId** (и при необходимости **identityId**) вызывайте API MetaMap / Mati (REST v2, вебхуки и т.д.). Если проверка есть и в ожидаемом состоянии — завершаете поток; иначе ошибка пользователю или `flow_error` в iframe.",
-    codeMatiTitle: "Пример запроса (псевдокод)",
+      "Нельзя полагаться только на браузер: по **verificationId** (и **identityId** как контекст) нужно получить **окончательный статус** в API MetaMap (REST, вебхуки или оба). Только после этого обновляйте учётную запись, номера и внутренние записи. Если проверки нет, она отклонена или не готова — сообщите пользователю и при необходимости отправьте **`flow_error`** в iframe, чтобы вернуть на нужный шаг.",
+    codeMatiTitle: "Пример запроса (псевдокод; пути зависят от версии API)",
     codeMati: `const v = await matiHttp.get(
   \`/v2/identities/[[HL]]\${identityId}[[/HL]]/verifications/[[HL]]\${verificationId}[[/HL]]\`
 );
 if (!v || v.status === "NOT_FOUND") {
-  // нет или ещё не готово
+  // ещё не проиндексировано, отказ или не найдено — согласуйте с вебхуками
 }`,
-    noteTitle: "Ошибки в iframe",
+    noteTitle: "Бизнес-ошибки в iframe (`flow_error`)",
     noteBody:
-      "Если проверка старого номера не прошла до Mati, родитель может отправить `postMessage`: `source: \"punto-pago-cambio-perfil-host\"`, `type: \"flow_error\"`, `errorCode` (например `OLD_APP_NUMBER_NOT_FOUND`) и `step: \"apps\"`. См. `cambio-perfil-errors.ts`.",
+      "Если проверка прежнего номера не прошла **до** Mati, хост может отправить iframe `postMessage` с **`source: \"punto-pago-cambio-perfil-host\"`**, **`type: \"flow_error\"`**, **`errorCode`** из каталога (например **`OLD_APP_NUMBER_NOT_FOUND`**) и опционально **`step`** (`\"apps\"`, `\"metamap\"`, …). Коды и тексты: **`cambio-perfil-errors.ts`**. Сообщения из iframe считайте **недоверенными**, пока не проверены origin и схема.",
   },
 };
