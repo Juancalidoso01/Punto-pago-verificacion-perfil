@@ -105,6 +105,7 @@ export const enMessages: AppMessages = {
       index: "← Guide index",
       flow: "← Back to verification flow",
       kicker: "Process guide",
+      whereInProcessLabel: "Where the user is in the flow",
     },
     pasoBody: {
       figuresLabel: "Flow view (wireframe)",
@@ -119,6 +120,8 @@ export const enMessages: AppMessages = {
         title: "Overview",
         summary:
           "The widget runs in an iframe; the parent (Punto Pago app) listens for messages and orchestrates Mati identity, validations, and server-side migration.",
+        whereInProcess:
+          "Big-picture journey: from when the user opens the embed through final confirmation — how each phase fits inside and outside the iframe.",
         userFacing: [
           "The user goes through notice → numbers → Mati verification → waiting for result → confirmation.",
           "Sensitive data is also sent to the parent via `postMessage` so your backend can act.",
@@ -146,6 +149,8 @@ export const enMessages: AppMessages = {
       notice: {
         title: "1. Initial notice",
         summary: "Data migration between app numbers and a limit of one change every 2 months.",
+        whereInProcess:
+          "Initial widget screen (notice step): the user only reads migration and frequency notices; they have not entered numbers or opened Mati yet.",
         userFacing: [
           "Read the notice about migration and the frequency limit for profile changes.",
           "Tap “Understood, continue” to go to the numbers step.",
@@ -166,6 +171,8 @@ export const enMessages: AppMessages = {
       apps: {
         title: "2. App numbers",
         summary: "Capture previous and new numbers (E.164) with country; basic client-side validation.",
+        whereInProcess:
+          "Apps step in the widget: the user is filling in previous and new app numbers (with country); this is the first data capture of the flow.",
         userFacing: [
           "Select country and previous and new app numbers.",
           "The Continue button only enables with valid format and two different numbers.",
@@ -195,6 +202,8 @@ export const enMessages: AppMessages = {
       metamap: {
         title: "3. Mati verification (SDK)",
         summary: "The user completes document + selfie in the embedded Mati flow; requires a valid `identityId`.",
+        whereInProcess:
+          "Metamap step in the widget: numbers are already submitted; the user is on identity verification (number summary + button that opens the Mati / MetaMap SDK).",
         userFacing: [
           "Confirm the numbers shown and open verification with the Mati button.",
           "They can go back to edit numbers if needed.",
@@ -225,6 +234,8 @@ export const enMessages: AppMessages = {
         title: "4. Mati finished → analysis",
         summary:
           "When Mati closes successfully, the widget sends verification IDs and moves to the waiting screen.",
+        whereInProcess:
+          "Right after Mati succeeds: the widget has already emitted `metamap_verification_submitted` with `verificationId` and `identityId`, and transitions toward the analysis screen.",
         userFacing: [
           "After Mati, they see the “analyzing” screen with a progress bar (demo ~60 s).",
         ],
@@ -255,6 +266,8 @@ export const enMessages: AppMessages = {
       analyzing: {
         title: "5. On-screen analysis",
         summary: "Wait while the parent processes (today the UI uses a demo timer).",
+        whereInProcess:
+          "Analyzing step in the widget: the user sees the wait state (message, progress bar, do not close). In production that wait should reflect what your backend does with the IDs and migration.",
         userFacing: ["See the do-not-close message and the progress bar."],
         widgetEmits: [],
         integrationHints: [
@@ -272,6 +285,8 @@ export const enMessages: AppMessages = {
       done: {
         title: "6. Completed",
         summary: "User confirmation; the parent receives flow completion in the demo.",
+        whereInProcess:
+          "Final done step in the widget: the user sees success confirmation and migrated numbers; the UI flow is complete (the parent also receives the last events).",
         userFacing: ["Success message and summary of migrated numbers."],
         widgetEmits: [
           {

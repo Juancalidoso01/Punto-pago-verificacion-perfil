@@ -25,6 +25,8 @@ export type CambioPerfilFlowGuideNode = {
   stepKey: CambioPerfilGuideStepKey | "overview";
   title: string;
   summary: string;
+  /** Parte del proceso / pantalla en la que está el usuario en este paso. */
+  whereInProcess: string;
   /** Qué hace o ve el usuario en la app. */
   userFacing: string[];
   /** Eventos `postMessage` que el iframe envía al padre en esta fase. */
@@ -61,6 +63,7 @@ export function buildFlowGuideNodes(
       stepKey: meta.stepKey,
       title: block.title,
       summary: block.summary,
+      whereInProcess: block.whereInProcess,
       userFacing: block.userFacing,
       widgetEmits: block.widgetEmits,
       integrationHints: block.integrationHints,

@@ -11,6 +11,11 @@ export type GuideFigure = {
 export type GuideStepBlock = {
   title: string;
   summary: string;
+  /**
+   * Qué parte del proceso vive el usuario en este paso (pantalla / acción),
+   * para alinear la guía con el flujo real del widget.
+   */
+  whereInProcess: string;
   userFacing: string[];
   widgetEmits: { type: string; when: string }[];
   integrationHints: string[];
@@ -111,6 +116,8 @@ export type AppMessages = {
       index: string;
       flow: string;
       kicker: string;
+      /** Etiqueta junto a `whereInProcess` en cada página de paso. */
+      whereInProcessLabel: string;
     };
     pasoBody: {
       figuresLabel: string;

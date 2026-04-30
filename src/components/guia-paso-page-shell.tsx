@@ -41,10 +41,22 @@ export function GuiaPasoPageShell({
         </Link>
       </div>
 
-      <header className="space-y-2 border-b border-slate-200/90 pb-4">
+      <header className="space-y-3 border-b border-slate-200/90 pb-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#4749B6]">
           {sh.kicker}
         </p>
+        <div
+          className="rounded-xl border border-[#4749B6]/25 bg-gradient-to-br from-[#4749B6]/[0.07] to-white/80 px-3.5 py-3 shadow-sm ring-1 ring-[#4749B6]/10 sm:px-4"
+          role="status"
+          aria-label={`${sh.whereInProcessLabel}: ${node.whereInProcess}`}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#4749B6]">
+            {sh.whereInProcessLabel}
+          </p>
+          <p className="mt-1.5 text-sm font-semibold leading-snug text-[#0B0B13] sm:text-[15px]">
+            {node.whereInProcess}
+          </p>
+        </div>
         <h1 className="text-xl font-bold tracking-tight text-[#0B0B13] sm:text-2xl">
           {node.title}
         </h1>

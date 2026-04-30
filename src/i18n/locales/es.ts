@@ -107,6 +107,7 @@ export const esMessages: AppMessages = {
       index: "← Índice de la guía",
       flow: "← Volver al flujo de verificación",
       kicker: "Guía del proceso",
+      whereInProcessLabel: "Dónde está el usuario en el proceso",
     },
     pasoBody: {
       figuresLabel: "Vista del flujo (wireframe)",
@@ -121,6 +122,8 @@ export const esMessages: AppMessages = {
         title: "Vista general",
         summary:
           "El widget vive en un iframe; el padre (app Punto Pago) escucha mensajes y orquesta identidad Mati, validaciones y migración en servidor.",
+        whereInProcess:
+          "Panorama del recorrido: desde que el usuario abre el embed hasta la confirmación final — útil para ver en qué orden ocurre cada cosa dentro y fuera del iframe.",
         userFacing: [
           "El usuario completa aviso → números → verificación Mati → espera de resultado → confirmación.",
           "Los datos sensibles también viajan al padre por `postMessage` para que vuestro backend actúe.",
@@ -149,6 +152,8 @@ export const esMessages: AppMessages = {
         title: "1. Aviso inicial",
         summary:
           "Migración de datos entre números de app y límite de un cambio cada 2 meses.",
+        whereInProcess:
+          "Pantalla inicial del widget (paso «aviso»): el usuario solo lee los avisos de migración y el límite de frecuencia; aún no ingresa números ni abre Mati.",
         userFacing: [
           "Lee el aviso sobre migración y el límite de frecuencia del cambio de perfil.",
           "Pulsa «Entendido, continuar» para pasar a los números.",
@@ -170,6 +175,8 @@ export const esMessages: AppMessages = {
         title: "2. Números de app",
         summary:
           "Captura número anterior y nuevo (E.164) con país; validación básica en cliente.",
+        whereInProcess:
+          "Paso «apps» del widget: el usuario está completando el formulario de número de app anterior y nuevo (con país); es la primera captura de datos del trámite.",
         userFacing: [
           "Indica país y número de app anterior y nuevo.",
           "El botón «Continuar» solo habilita con formato válido y números distintos.",
@@ -201,6 +208,8 @@ export const esMessages: AppMessages = {
         title: "3. Verificación Mati (SDK)",
         summary:
           "El usuario completa documento + selfie en el flujo Mati embebido; requiere `identityId` válido.",
+        whereInProcess:
+          "Paso «metamap» del widget: ya envió los números; ahora está en la pantalla de verificación de identidad (resumen de números + botón que abre el SDK Mati / MetaMap).",
         userFacing: [
           "Confirma los números mostrados y abre la verificación con el botón Mati.",
           "Puede volver a editar números si lo necesita.",
@@ -231,6 +240,8 @@ export const esMessages: AppMessages = {
         title: "4. Fin de Mati → análisis",
         summary:
           "Al cerrar Mati con éxito, el widget envía los IDs de verificación y pasa a la pantalla de espera.",
+        whereInProcess:
+          "Momento inmediatamente posterior a cerrar Mati con éxito: el widget ya emitió `metamap_verification_submitted` con `verificationId` e `identityId` y entra en la transición hacia la pantalla de análisis.",
         userFacing: [
           "Tras completar Mati, ve la pantalla de «analizando» con barra de progreso (en demo ~60 s).",
         ],
@@ -263,6 +274,8 @@ export const esMessages: AppMessages = {
         title: "5. Análisis en pantalla",
         summary:
           "Espera mientras el padre procesa (hoy la UI usa un temporizador de demostración).",
+        whereInProcess:
+          "Paso «analyzing» del widget: el usuario ve la espera (mensaje, barra de progreso, no cerrar ventana). En producción esa espera debe reflejar lo que hace vuestro backend con los IDs y la migración.",
         userFacing: [
           "Ve el mensaje de no cerrar la ventana y la barra de progreso.",
         ],
@@ -283,6 +296,8 @@ export const esMessages: AppMessages = {
         title: "6. Completado",
         summary:
           "Confirmación al usuario; el padre recibe el cierre del flujo en la demo.",
+        whereInProcess:
+          "Paso final «done» del widget: el usuario ve la confirmación de éxito y el resumen de números migrados; el flujo en la UI llegó a su cierre (en paralelo el padre recibe los últimos eventos).",
         userFacing: [
           "Mensaje de éxito y resumen de números migrados.",
         ],
