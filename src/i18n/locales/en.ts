@@ -82,6 +82,7 @@ export const enMessages: AppMessages = {
   },
   guide: {
     teaser: {
+      sectionLabel: "Reference material only · not part of this transaction",
       title: "Guide & integration (separate from the flow)",
       body:
         "Step-by-step documentation on its own pages: what the user does, which `postMessage` events the widget sends, and when your backend should call APIs. Use the button to open the index and pick a step; each page links back to the flow or the index.",

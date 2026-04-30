@@ -84,6 +84,7 @@ export const esMessages: AppMessages = {
   },
   guide: {
     teaser: {
+      sectionLabel: "Solo material explicativo · no es parte del trámite",
       title: "Guía e integración (separada del flujo)",
       body:
         "Documentación paso a paso en páginas propias: qué hace el usuario, qué `postMessage` emite el widget y cuándo conviene que el backend consulte APIs. Usá el botón para abrir el índice y elegir un paso; en cada página podés volver al flujo o al índice.",

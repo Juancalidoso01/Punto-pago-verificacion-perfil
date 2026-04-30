@@ -80,7 +80,13 @@ export type AppMessages = {
     matiAria: string;
   };
   guide: {
-    teaser: { title: string; body: string; cta: string };
+    teaser: {
+      title: string;
+      body: string;
+      cta: string;
+      /** Línea corta que separa este bloque del trámite principal. */
+      sectionLabel: string;
+    };
     index: {
       backFlow: string;
       title: string;

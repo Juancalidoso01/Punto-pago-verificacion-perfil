@@ -302,11 +302,6 @@ export function CambioPerfilFlow({
             <p className="mt-2">{renderInlineStrong(t.noticeLimitBody)}</p>
           </div>
 
-          <CambioPerfilFlowGuideTeaser
-            compact={compact}
-            embedQuerySuffix={guiaEmbedQuerySuffix}
-          />
-
           <p className="text-sm leading-relaxed text-slate-600">
             {t.noticeFooter}
             {merchantLabel ? (
@@ -322,6 +317,22 @@ export function CambioPerfilFlow({
           <button type="button" onClick={() => setStep("apps")} className={btnPrimary}>
             {t.btnUnderstood}
           </button>
+
+          <section
+            className="mt-8 border-t border-dashed border-slate-200/90 pt-6"
+            aria-labelledby="guia-doc-section-label"
+          >
+            <p
+              id="guia-doc-section-label"
+              className="mb-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+            >
+              {messages.guide.teaser.sectionLabel}
+            </p>
+            <CambioPerfilFlowGuideTeaser
+              compact={compact}
+              embedQuerySuffix={guiaEmbedQuerySuffix}
+            />
+          </section>
         </div>
       )}
 
