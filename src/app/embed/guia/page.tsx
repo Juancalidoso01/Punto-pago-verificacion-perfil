@@ -1,4 +1,4 @@
-import { CambioPerfilFlow } from "@/components/cambio-perfil-flow";
+import { GuiaIndex } from "@/components/guia-index";
 import { PpAmbient } from "@/components/pp-ambient";
 import {
   clampEmbedText,
@@ -7,12 +7,9 @@ import {
 } from "@/lib/embed-security";
 import { buildEmbedGuiaQuery } from "@/lib/cambio-perfil-flow-guide";
 
-type SearchParams = Promise<{
-  label?: string | string[];
-  identityId?: string | string[];
-}>;
+type SearchParams = Promise<{ label?: string | string[]; identityId?: string | string[] }>;
 
-export default async function EmbedPage({
+export default async function EmbedGuiaIndexPage({
   searchParams,
 }: {
   searchParams: SearchParams;
@@ -37,7 +34,7 @@ export default async function EmbedPage({
         ? safeDecodeURIComponent(rawIdentity[0] ?? "").trim()
         : "";
 
-  const guiaEmbedQuerySuffix = buildEmbedGuiaQuery({
+  const q = buildEmbedGuiaQuery({
     label: merchantLabel,
     identityId: identityFromQuery || null,
   });
@@ -45,12 +42,11 @@ export default async function EmbedPage({
   return (
     <div className="pp-page-bg relative min-h-dvh min-h-[100dvh]">
       <PpAmbient />
-      <div className="relative z-10 flex min-h-dvh min-h-[100dvh] items-center justify-center pl-[calc(1rem+env(safe-area-inset-left,0px))] pr-[calc(1rem+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1rem+env(safe-area-inset-top,0px))] sm:p-6">
-        <CambioPerfilFlow
-          compact
-          merchantLabel={merchantLabel}
-          matiIdentityId={identityFromQuery || null}
-          guiaEmbedQuerySuffix={guiaEmbedQuerySuffix}
+      <div className="relative z-10 mx-auto w-full max-w-[min(100%,28rem)] px-[calc(1rem+env(safe-area-inset-left,0px))] py-8 pr-[calc(1rem+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1rem+env(safe-area-inset-top,0px))] sm:px-6">
+        <GuiaIndex
+          basePath="/embed/guia"
+          flowHref={q ? `/embed${q}` : "/embed"}
+          querySuffix={q}
         />
       </div>
     </div>

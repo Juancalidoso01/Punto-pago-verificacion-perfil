@@ -38,6 +38,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/embed/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: frameAncestorsCsp,
+          },
+        ],
+      },
+      {
         source: "/widget",
         headers: [
           {

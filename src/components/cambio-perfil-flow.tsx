@@ -9,7 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { AppNumberField } from "@/components/app-number-field";
-import { CambioPerfilFlowGuide } from "@/components/cambio-perfil-flow-guide";
+import { CambioPerfilFlowGuideTeaser } from "@/components/cambio-perfil-flow-guide-teaser";
 import { MigrationAnalysisPending } from "@/components/migration-analysis-pending";
 import { ProfileMetamapButton } from "@/components/profile-metamap-button";
 import {
@@ -55,12 +55,15 @@ export function CambioPerfilFlow({
   compact = false,
   merchantLabel,
   matiIdentityId: matiIdentityIdProp,
+  guiaEmbedQuerySuffix = "",
 }: {
   /** Vista compacta para incrustar en iframe */
   compact?: boolean;
   merchantLabel?: string | null;
   /** Identidad Mati (hex). Si no se pasa, se usa solo `NEXT_PUBLIC_METAMAP_IDENTITY_ID` en build. */
   matiIdentityId?: string | null;
+  /** Solo embed: query para enlaces `/embed/guia` (p. ej. `?label=…&identityId=…`). */
+  guiaEmbedQuerySuffix?: string;
 }) {
   const [step, setStep] = useState<Step>("notice");
   const [oldCountryIso, setOldCountryIso] = useState(DEFAULT_DIAL_ISO);
@@ -304,7 +307,10 @@ export function CambioPerfilFlow({
             </p>
           </div>
 
-          <CambioPerfilFlowGuide compact={compact} />
+          <CambioPerfilFlowGuideTeaser
+            compact={compact}
+            embedQuerySuffix={guiaEmbedQuerySuffix}
+          />
 
           <p className="text-sm leading-relaxed text-slate-600">
             Después indicarás el número de app anterior y el nuevo, y completarás

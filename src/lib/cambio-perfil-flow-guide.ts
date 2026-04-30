@@ -33,6 +33,26 @@ export type CambioPerfilFlowGuideNode = {
   integrationHints: string[];
 };
 
+export function getGuideNodeBySlug(
+  slug: string,
+): CambioPerfilFlowGuideNode | undefined {
+  return CAMBIO_PERFIL_FLOW_GUIDE_NODES.find((n) => n.id === slug);
+}
+
+/** Query opcional para conservar `label` e `identityId` en enlaces `/embed/guia`. */
+export function buildEmbedGuiaQuery(params: {
+  label?: string | null;
+  identityId?: string | null;
+}): string {
+  const q = new URLSearchParams();
+  const label = (params.label ?? "").trim();
+  const id = (params.identityId ?? "").trim();
+  if (label) q.set("label", label);
+  if (id) q.set("identityId", id);
+  const s = q.toString();
+  return s ? `?${s}` : "";
+}
+
 export const CAMBIO_PERFIL_FLOW_GUIDE_NODES: CambioPerfilFlowGuideNode[] = [
   {
     id: "overview",

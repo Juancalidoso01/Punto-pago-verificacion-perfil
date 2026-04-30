@@ -69,9 +69,9 @@
  *
  * ## Guía paso a paso (producto / integradores)
  *
- * En la UI del paso inicial se muestra una guía interactiva alineada con este
- * contrato; el contenido estructurado vive en `cambio-perfil-flow-guide.ts` y el
- * componente `CambioPerfilFlowGuide`.
+ * En el paso inicial hay un enlace a la guía en páginas dedicadas (`/guia`,
+ * `/embed/guia` y `/guia/[slug]` / `/embed/guia/[slug]`). El contenido
+ * estructurado está en `cambio-perfil-flow-guide.ts`.
  */
 
 /** Tiempo de la barra “analizando información” en la UI (demo). Producción: alinear con backend o eliminar. */
