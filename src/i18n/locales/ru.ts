@@ -110,7 +110,7 @@ export const ruMessages: AppMessages = {
     pasoBody: {
       figuresLabel: "Вид потока (wireframe)",
       figuresFootnote:
-        "Опорные схемы. Их можно заменить реальными скриншотами (PNG/WebP) по тем же путям в public/guia/.",
+        "Опорные схемы. Их можно заменить скриншотами (PNG/WebP) в public/guide-media/ (те же имена файлов).",
       userFacing: "В приложении",
       postMessage: "Виджет → родитель (`postMessage`)",
       backend: "Бэкенд / родитель — когда запрашивать или действовать",

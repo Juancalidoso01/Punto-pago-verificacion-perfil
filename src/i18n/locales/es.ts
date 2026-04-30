@@ -112,7 +112,7 @@ export const esMessages: AppMessages = {
     pasoBody: {
       figuresLabel: "Vista del flujo (wireframe)",
       figuresFootnote:
-        "Diagramas de referencia. Podés sustituirlos por capturas reales (PNG/WebP) con la misma ruta bajo public/guia/.",
+        "Diagramas de referencia. Podés sustituirlos por capturas reales (PNG/WebP) en public/guide-media/ (mismo nombre de archivo).",
       userFacing: "En la app",
       postMessage: "Widget → padre (`postMessage`)",
       backend: "Backend / padre — cuándo consultar o actuar",

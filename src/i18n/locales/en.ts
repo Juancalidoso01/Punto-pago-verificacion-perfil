@@ -110,7 +110,7 @@ export const enMessages: AppMessages = {
     pasoBody: {
       figuresLabel: "Flow view (wireframe)",
       figuresFootnote:
-        "Reference diagrams. Replace with real screenshots (PNG/WebP) at the same paths under public/guia/.",
+        "Reference diagrams. Replace with real screenshots (PNG/WebP) in public/guide-media/ (same filenames).",
       userFacing: "In the app",
       postMessage: "Widget → parent (`postMessage`)",
       backend: "Backend / parent — when to query or act",
