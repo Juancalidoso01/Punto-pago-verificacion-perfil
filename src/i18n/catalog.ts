@@ -1,12 +1,5 @@
 import type { CambioPerfilErrorCode } from "@/lib/cambio-perfil-errors";
 
-/** Ilustración del paso (archivo en `/public`, p. ej. captura o wireframe SVG). */
-export type GuideFigure = {
-  src: string;
-  alt: string;
-  caption?: string;
-};
-
 /** Contenido traducible de un paso de la guía (sin `id` / `stepKey`). */
 export type GuideStepBlock = {
   title: string;
@@ -19,8 +12,6 @@ export type GuideStepBlock = {
   userFacing: string[];
   widgetEmits: { type: string; when: string }[];
   integrationHints: string[];
-  /** Diagramas o capturas mostrados en la página del paso. */
-  figures?: GuideFigure[];
 };
 
 export type GuideSteps = {
@@ -123,8 +114,9 @@ export type AppMessages = {
       whereInProcessLabel: string;
     };
     pasoBody: {
-      figuresLabel: string;
-      figuresFootnote: string;
+      openFlowStepTitle: string;
+      openFlowStepButton: string;
+      openFlowStepFootnote: string;
       userFacing: string;
       postMessage: string;
       backend: string;

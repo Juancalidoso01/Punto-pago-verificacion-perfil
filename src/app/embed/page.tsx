@@ -6,11 +6,15 @@ import {
   EMBED_MERCHANT_LABEL_MAX_LENGTH,
   safeDecodeURIComponent,
 } from "@/lib/embed-security";
-import { buildEmbedGuiaQuery } from "@/lib/cambio-perfil-flow-guide";
+import {
+  buildEmbedGuiaQuery,
+  parseEmbedFlowStepFromSearchParam,
+} from "@/lib/cambio-perfil-flow-guide";
 
 type SearchParams = Promise<{
   label?: string | string[];
   identityId?: string | string[];
+  step?: string | string[];
 }>;
 
 export default async function EmbedPage({
@@ -43,6 +47,8 @@ export default async function EmbedPage({
     identityId: identityFromQuery || null,
   });
 
+  const initialStep = parseEmbedFlowStepFromSearchParam(sp.step);
+
   return (
     <div className="pp-page-bg relative min-h-dvh min-h-[100dvh]">
       <EmbedTopBar />
@@ -53,6 +59,7 @@ export default async function EmbedPage({
           merchantLabel={merchantLabel}
           matiIdentityId={identityFromQuery || null}
           guiaEmbedQuerySuffix={guiaEmbedQuerySuffix}
+          initialStep={initialStep}
         />
       </div>
     </div>

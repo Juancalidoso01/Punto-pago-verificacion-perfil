@@ -29,6 +29,7 @@ import {
   isAllowedParentMessageOrigin,
   resolvePostMessageTargetOriginForSend,
 } from "@/lib/embed-security";
+import type { EmbedFlowStepParam } from "@/lib/cambio-perfil-flow-guide";
 import { resolveMatiIdentityId } from "@/lib/metamap-public-config";
 import {
   DEFAULT_DIAL_ISO,
@@ -63,6 +64,7 @@ export function CambioPerfilFlow({
   merchantLabel,
   matiIdentityId: matiIdentityIdProp,
   guiaEmbedQuerySuffix = "",
+  initialStep = null,
 }: {
   /** Vista compacta para incrustar en iframe */
   compact?: boolean;
@@ -71,10 +73,12 @@ export function CambioPerfilFlow({
   matiIdentityId?: string | null;
   /** Solo embed: query para enlaces `/embed/guia` (p. ej. `?label=…&identityId=…`). */
   guiaEmbedQuerySuffix?: string;
+  /** Abrir en un paso concreto (`?step=` desde guía o pruebas). */
+  initialStep?: EmbedFlowStepParam | null;
 }) {
   const { messages } = useI18n();
   const t = messages.flow;
-  const [step, setStep] = useState<Step>("notice");
+  const [step, setStep] = useState<Step>(() => initialStep ?? "notice");
   const [oldCountryIso, setOldCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [oldNational, setOldNational] = useState("");
   const [newCountryIso, setNewCountryIso] = useState(DEFAULT_DIAL_ISO);

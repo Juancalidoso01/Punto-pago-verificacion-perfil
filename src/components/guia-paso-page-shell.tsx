@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { GuiaPasoBody } from "@/components/guia-paso-body";
-import type { CambioPerfilFlowGuideNode } from "@/lib/cambio-perfil-flow-guide";
+import {
+  buildOpenFlowHref,
+  type CambioPerfilFlowGuideNode,
+} from "@/lib/cambio-perfil-flow-guide";
 import { useI18n } from "@/i18n/i18n-context";
 
 type Mode = "site" | "embed";
@@ -29,6 +32,11 @@ export function GuiaPasoPageShell({
       : "";
   const indexHref = mode === "embed" ? `/embed/guia${q}` : "/guia";
   const flowHref = mode === "embed" ? `/embed${q}` : "/";
+  const openFlowHref = buildOpenFlowHref({
+    mode,
+    embedQuerySuffix: q,
+    step: node.openFlowStep,
+  });
 
   return (
     <div className="space-y-6">
@@ -63,7 +71,7 @@ export function GuiaPasoPageShell({
         <p className="text-sm leading-relaxed text-slate-600">{node.summary}</p>
       </header>
 
-      <GuiaPasoBody node={node} />
+      <GuiaPasoBody node={node} openFlowHref={openFlowHref} />
     </div>
   );
 }
