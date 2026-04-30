@@ -18,7 +18,7 @@ export const esMessages: AppMessages = {
   },
   errors: {
     INVALID_NUMBER_FORMAT:
-      "Indica el número de app con el prefijo elegido (6–15 dígitos).",
+      "Indica el número de app con el prefijo elegido (1–15 dígitos).",
     DUPLICATE_APP_NUMBERS:
       "El número de app nuevo debe ser distinto al número de app anterior.",
     OLD_APP_NUMBER_NOT_FOUND:
@@ -55,9 +55,9 @@ export const esMessages: AppMessages = {
     metamapIntro:
       "Quedó registrada la migración de **{{old}}** a **{{new}}**. Para completar el cambio de perfil debemos confirmar que eres tú: ten a mano un **documento de identidad vigente**, pulsa el botón de abajo y sigue los pasos en pantalla (incluye una **foto tipo selfie**).",
     metamapBack: "Volver y editar números",
-    metamapConfigTitle: "Configuración de verificación",
-    metamapConfigBody:
-      "Falta el **identityId** de Mati. El sistema que incrusta esta página debe crear la identidad en Mati y pasarla en la URL del embed (por ejemplo `?identityId=…`) o definir `NEXT_PUBLIC_METAMAP_IDENTITY_ID` solo en entornos de prueba.",
+    metamapDemoHint:
+      "Sin **identityId** válido no se abre el SDK de Mati. Usá el botón de abajo para simular una verificación y ver el resto del flujo; en producción el integrador debe pasar `?identityId=…` o `NEXT_PUBLIC_METAMAP_IDENTITY_ID` en pruebas.",
+    metamapDemoButton: "Continuar sin Mati (simular verificación)",
     doneH1: "Cambio de perfil completado",
     doneBody:
       "Tu identidad quedó validada y la migración entre números quedó registrada. Puedes seguir usando la aplicación Punto Pago con tu número nuevo.",

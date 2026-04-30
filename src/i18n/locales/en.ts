@@ -18,7 +18,7 @@ export const enMessages: AppMessages = {
   },
   errors: {
     INVALID_NUMBER_FORMAT:
-      "Enter the app number with the selected prefix (6–15 digits).",
+      "Enter the app number with the selected prefix (1–15 digits).",
     DUPLICATE_APP_NUMBERS:
       "The new app number must be different from the previous app number.",
     OLD_APP_NUMBER_NOT_FOUND:
@@ -54,9 +54,9 @@ export const enMessages: AppMessages = {
     metamapIntro:
       "We registered migration from **{{old}}** to **{{new}}**. To finish the profile change we must confirm it is you: have a **valid ID document** ready, tap the button below and follow the on-screen steps (including a **selfie**).",
     metamapBack: "Back to edit numbers",
-    metamapConfigTitle: "Verification configuration",
-    metamapConfigBody:
-      "The Mati **identityId** is missing. The system embedding this page must create the identity in Mati and pass it in the embed URL (for example `?identityId=…`) or set `NEXT_PUBLIC_METAMAP_IDENTITY_ID` only in test environments.",
+    metamapDemoHint:
+      "Without a valid **identityId**, the Mati SDK does not open. Use the button below to simulate a verification and walk through the rest of the flow; in production the embed must pass `?identityId=…` or `NEXT_PUBLIC_METAMAP_IDENTITY_ID` for tests.",
+    metamapDemoButton: "Continue without Mati (simulate verification)",
     doneH1: "Profile change completed",
     doneBody:
       "Your identity was validated and the number migration was recorded. You can keep using the Punto Pago app with your new number.",

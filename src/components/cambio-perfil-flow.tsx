@@ -19,6 +19,10 @@ import {
 } from "@/lib/cambio-perfil-errors";
 import { renderInlineStrong } from "@/lib/render-inline-strong";
 import { interpolate } from "@/lib/interpolate";
+import {
+  DEMO_METAMAP_IDENTITY_ID,
+  DEMO_METAMAP_VERIFICATION_ID,
+} from "@/lib/cambio-perfil-demo-metamap";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
   clampEmbedText,
@@ -35,7 +39,8 @@ import {
 
 type Step = "notice" | "apps" | "metamap" | "analyzing" | "done";
 
-const MIN_NATIONAL = 6;
+/** Mínimo bajo para permitir recorrer el flujo con números cortos de prueba. */
+const MIN_NATIONAL = 1;
 const MAX_NATIONAL = 15;
 
 /** Identificador en postMessage para la app contenedora (iframe). */
@@ -261,6 +266,19 @@ export function CambioPerfilFlow({
     });
   }, [oldE164, newE164]);
 
+  /** Sin `identityId` real: simula cierre Mati para que cualquiera recorra el flujo (solo demo). */
+  const onDemoMetamapContinue = useCallback(() => {
+    notifyParent({
+      type: "metamap_started",
+      oldPhoneE164: oldE164,
+      newPhoneE164: newE164,
+    });
+    onMetamapComplete({
+      verificationId: DEMO_METAMAP_VERIFICATION_ID,
+      identityId: DEMO_METAMAP_IDENTITY_ID,
+    });
+  }, [oldE164, newE164, onMetamapComplete]);
+
   const cardClass = compact
     ? "w-full max-w-[min(100%,28rem)] rounded-2xl border border-white/70 bg-white/90 p-4 shadow-lg shadow-slate-900/[0.06] backdrop-blur-md sm:p-6"
     : "mx-auto w-full max-w-lg rounded-2xl border border-white/70 bg-white/90 p-4 shadow-xl shadow-slate-900/[0.08] backdrop-blur-md sm:p-8";
@@ -415,14 +433,20 @@ export function CambioPerfilFlow({
               onUserStartedSdk={onMetamapUserStarted}
             />
           ) : (
-            <div
-              className="rounded-xl border border-amber-200/90 bg-amber-50/90 p-4 text-sm text-amber-950"
-              role="alert"
-            >
-              <p className="font-semibold">{t.metamapConfigTitle}</p>
-              <p className="mt-2 leading-relaxed">
-                {renderInlineStrong(t.metamapConfigBody)}
-              </p>
+            <div className="space-y-4">
+              <div
+                className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700"
+                role="note"
+              >
+                {renderInlineStrong(t.metamapDemoHint)}
+              </div>
+              <button
+                type="button"
+                onClick={onDemoMetamapContinue}
+                className={btnPrimary}
+              >
+                {t.metamapDemoButton}
+              </button>
             </div>
           )}
           <button

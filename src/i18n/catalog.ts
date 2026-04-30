@@ -68,8 +68,8 @@ export type AppMessages = {
     metamapH1: string;
     metamapIntro: string;
     metamapBack: string;
-    metamapConfigTitle: string;
-    metamapConfigBody: string;
+    metamapDemoHint: string;
+    metamapDemoButton: string;
     doneH1: string;
     doneBody: string;
     doneNumbersLabel: string;
