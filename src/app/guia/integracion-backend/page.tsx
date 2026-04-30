@@ -1,22 +1,18 @@
-import { GuiaIndex } from "@/components/guia-index";
+import { GuiaBackendIntegrationDoc } from "@/components/guia-backend-integration-doc";
 import { PpAppChrome } from "@/components/pp-app-chrome";
 import { getLocale } from "@/i18n/get-locale";
 import { getAppMessages } from "@/i18n/messages";
-import { buildFlowGuideNodes } from "@/lib/cambio-perfil-flow-guide";
 
-export default async function GuiaPage() {
+export default async function GuiaBackendIntegrationPage() {
   const messages = getAppMessages(await getLocale());
-  const nodes = buildFlowGuideNodes(messages.guide);
 
   return (
     <PpAppChrome>
       <div className="mx-auto max-w-lg pb-16 sm:max-w-xl">
-        <GuiaIndex
-          basePath="/guia"
+        <GuiaBackendIntegrationDoc
+          doc={messages.backendDoc}
+          indexHref="/guia"
           flowHref="/"
-          querySuffix=""
-          nodes={nodes}
-          index={messages.guide.index}
         />
       </div>
     </PpAppChrome>

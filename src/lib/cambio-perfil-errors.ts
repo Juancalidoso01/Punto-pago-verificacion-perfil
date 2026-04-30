@@ -22,37 +22,23 @@ export const CAMBIO_PERFIL_ERROR_CODES = [
 
 export type CambioPerfilErrorCode = (typeof CAMBIO_PERFIL_ERROR_CODES)[number];
 
-export const CAMBIO_PERFIL_ERROR_MESSAGES: Record<
-  CambioPerfilErrorCode,
-  string
-> = {
-  INVALID_NUMBER_FORMAT:
-    "Indica el número de app con el prefijo elegido (6–15 dígitos).",
-  DUPLICATE_APP_NUMBERS:
-    "El número de app nuevo debe ser distinto al número de app anterior.",
-  OLD_APP_NUMBER_NOT_FOUND:
-    "No encontramos una cuenta Punto Pago asociada a ese número de app anterior. Revisa el número, el país e inténtalo de nuevo.",
-  OLD_APP_NUMBER_NO_PROFILE:
-    "Ese número de app no tiene un perfil previo con Punto Pago. Solo puedes migrar desde un número con el que ya hayas usado el servicio.",
-  PROFILE_CHANGE_ALREADY_REGISTERED:
-    "Este número ya tiene un cambio de perfil registrado o aún no cumples el plazo entre cambios (máximo uno cada 2 meses). Si necesitas ayuda, contacta a soporte.",
-};
+import type { AppMessages } from "@/i18n/catalog";
 
 const KNOWN = new Set<string>(CAMBIO_PERFIL_ERROR_CODES);
 
+type ErrorCatalog = AppMessages["errors"];
+
 /**
- * Resuelve un código conocido al texto en español; si el código es desconocido,
- * devuelve `fallback` o un mensaje genérico.
+ * Resuelve un código conocido al texto del catálogo i18n; si el código es desconocido,
+ * devuelve `fallback` o el mensaje genérico del catálogo.
  */
 export function resolveCambioPerfilErrorMessage(
   code: string,
+  catalog: ErrorCatalog,
   fallback?: string,
 ): string {
   if (KNOWN.has(code)) {
-    return CAMBIO_PERFIL_ERROR_MESSAGES[code as CambioPerfilErrorCode];
+    return catalog[code as CambioPerfilErrorCode];
   }
-  return (
-    fallback?.trim() ||
-    "No pudimos completar el paso. Revisa los datos e inténtalo de nuevo."
-  );
+  return fallback?.trim() || catalog.genericHost;
 }

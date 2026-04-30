@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { GuiaPasoBody } from "@/components/guia-paso-body";
 import type { CambioPerfilFlowGuideNode } from "@/lib/cambio-perfil-flow-guide";
+import { useI18n } from "@/i18n/i18n-context";
 
 type Mode = "site" | "embed";
 
@@ -17,7 +20,13 @@ export function GuiaPasoPageShell({
   /** p. ej. `?label=…&identityId=…` para rutas embed */
   embedQuerySuffix: string;
 }) {
-  const q = embedQuerySuffix.startsWith("?") ? embedQuerySuffix : embedQuerySuffix ? `?${embedQuerySuffix}` : "";
+  const { messages } = useI18n();
+  const sh = messages.guide.pasoShell;
+  const q = embedQuerySuffix.startsWith("?")
+    ? embedQuerySuffix
+    : embedQuerySuffix
+      ? `?${embedQuerySuffix}`
+      : "";
   const indexHref = mode === "embed" ? `/embed/guia${q}` : "/guia";
   const flowHref = mode === "embed" ? `/embed${q}` : "/";
 
@@ -25,16 +34,16 @@ export function GuiaPasoPageShell({
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
         <Link href={indexHref} className={linkSecondary}>
-          ← Índice de la guía
+          {sh.index}
         </Link>
         <Link href={flowHref} className={linkSecondary}>
-          ← Volver al flujo de verificación
+          {sh.flow}
         </Link>
       </div>
 
       <header className="space-y-2 border-b border-slate-200/90 pb-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#4749B6]">
-          Guía del proceso
+          {sh.kicker}
         </p>
         <h1 className="text-xl font-bold tracking-tight text-[#0B0B13] sm:text-2xl">
           {node.title}

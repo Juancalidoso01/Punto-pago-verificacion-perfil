@@ -1,0 +1,49 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import type { Locale } from "@/i18n/types";
+import { LOCALES } from "@/i18n/types";
+import { useI18n } from "@/i18n/i18n-context";
+
+function hrefWithLang(pathname: string, search: string, lang: Locale) {
+  const q = new URLSearchParams(search);
+  q.set("lang", lang);
+  const s = q.toString();
+  return `${pathname}${s ? `?${s}` : ""}`;
+}
+
+export function PpLangSwitcher({ className = "" }: { className?: string }) {
+  const { locale, messages } = useI18n();
+  const pathname = usePathname() || "/";
+  const sp = useSearchParams();
+  const search = useMemo(() => sp.toString(), [sp]);
+
+  return (
+    <div
+      className={`flex items-center gap-1 rounded-lg border border-slate-200/80 bg-white/70 px-1 py-0.5 text-[11px] font-semibold shadow-sm sm:text-xs ${className}`}
+      role="group"
+      aria-label={messages.lang.label}
+    >
+      {LOCALES.map((l) => {
+        const active = l === locale;
+        return (
+          <Link
+            key={l}
+            href={hrefWithLang(pathname, search, l)}
+            className={`pp-touch min-h-9 min-w-9 rounded-md px-2 py-1.5 text-center sm:min-h-0 sm:min-w-0 sm:px-2 sm:py-1 ${
+              active
+                ? "bg-[#4749B6] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+            aria-current={active ? "true" : undefined}
+            prefetch={false}
+          >
+            {messages.lang[l]}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}

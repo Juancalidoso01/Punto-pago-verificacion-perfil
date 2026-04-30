@@ -1,17 +1,18 @@
 "use client";
 
+import { useI18n } from "@/i18n/i18n-context";
 import { DIAL_COUNTRIES, type DialCountry } from "@/lib/dial-countries";
 
 const selectClass =
   "pp-input-mobile pp-touch w-full min-h-12 shrink-0 rounded-xl border border-slate-200/90 bg-slate-50/90 py-2 pl-2 pr-8 font-medium text-[#0B0B13] outline-none focus:border-[#4749B6]/50 focus:ring-2 focus:ring-[#4749B6]/25 sm:max-w-[11rem] sm:min-h-0 sm:w-auto sm:py-2.5 sm:text-sm";
 
-function FormatOkIcon() {
+function FormatOkIcon({ title, aria }: { title: string; aria: string }) {
   return (
     <span
       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-600/20 ring-1 ring-emerald-400/30"
-      title="Formato válido"
+      title={title}
       role="img"
-      aria-label="Formato válido"
+      aria-label={aria}
     >
       <svg
         viewBox="0 0 20 20"
@@ -54,6 +55,8 @@ export function AppNumberField({
   formatOk = false,
   duplicateError = false,
 }: Props) {
+  const { messages } = useI18n();
+  const f = messages.fields;
   const inputClass = [
     "pp-input-mobile pp-touch min-h-12 min-w-0 flex-1 rounded-xl border bg-white px-3 py-2.5 text-[#0B0B13] shadow-inner shadow-slate-900/[0.03] outline-none transition sm:min-h-0 sm:text-sm",
     duplicateError
@@ -82,7 +85,7 @@ export function AppNumberField({
             className={`${selectClass} ${selectStateClass}`}
             value={countryIso}
             onChange={(e) => onCountryIso(e.target.value)}
-            aria-label={`País o prefijo para ${label}`}
+            aria-label={f.countryAria(label)}
             aria-invalid={duplicateError || undefined}
           >
             {DIAL_COUNTRIES.map((c: DialCountry) => (
@@ -98,19 +101,21 @@ export function AppNumberField({
               inputMode="numeric"
               autoComplete="tel-national"
               className={inputClass}
-              placeholder="Número de app"
+              placeholder={f.phonePlaceholder}
               value={nationalDigits}
               onChange={(e) =>
                 onNationalDigits(e.target.value.replace(/\D/g, "").slice(0, 15))
               }
               aria-invalid={duplicateError || undefined}
             />
-            {formatOk ? <FormatOkIcon /> : null}
+            {formatOk ? (
+              <FormatOkIcon title={f.formatOkTitle} aria={f.formatOkAria} />
+            ) : null}
           </div>
         </div>
         {duplicateError ? (
           <span className="mt-1 block text-xs font-medium text-red-600">
-            Debe ser distinto al número de app anterior.
+            {f.duplicateUnderField}
           </span>
         ) : null}
       </label>

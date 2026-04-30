@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useI18n } from "@/i18n/i18n-context";
 
 const boxClass =
   "rounded-xl border border-dashed border-[#4749B6]/35 bg-slate-50/60 p-4 shadow-inner shadow-slate-900/[0.02] sm:p-5";
@@ -16,6 +19,8 @@ export function CambioPerfilFlowGuideTeaser({
   /** Solo embed: conservar `label` / `identityId` en la URL (incluye `?` si hay params). */
   embedQuerySuffix?: string;
 }) {
+  const { messages } = useI18n();
+  const g = messages.guide.teaser;
   const q = embedQuerySuffix.startsWith("?")
     ? embedQuerySuffix
     : embedQuerySuffix
@@ -29,17 +34,13 @@ export function CambioPerfilFlowGuideTeaser({
         id="guia-teaser-title"
         className="text-sm font-bold tracking-tight text-[#0B0B13] sm:text-base"
       >
-        Guía e integración (separada del flujo)
+        {g.title}
       </h2>
       <p className="mt-2 text-left text-xs leading-relaxed text-slate-600 sm:text-sm">
-        Documentación paso a paso en páginas propias: qué hace el usuario, qué{" "}
-        <code className="rounded bg-white/80 px-1 font-mono text-[11px]">postMessage</code>{" "}
-        emite el widget y cuándo conviene que el backend consulte APIs. Usá el botón
-        para abrir el índice y elegir un paso; en cada página podés volver al flujo o al
-        índice.
+        {g.body}
       </p>
       <Link href={guiaHref} className={linkClass}>
-        Abrir guía paso a paso
+        {g.cta}
       </Link>
     </aside>
   );

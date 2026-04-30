@@ -12,11 +12,13 @@ import { AppNumberField } from "@/components/app-number-field";
 import { CambioPerfilFlowGuideTeaser } from "@/components/cambio-perfil-flow-guide-teaser";
 import { MigrationAnalysisPending } from "@/components/migration-analysis-pending";
 import { ProfileMetamapButton } from "@/components/profile-metamap-button";
+import { useI18n } from "@/i18n/i18n-context";
 import {
-  CAMBIO_PERFIL_ERROR_MESSAGES,
   CAMBIO_PERFIL_HOST_MESSAGE_SOURCE,
   resolveCambioPerfilErrorMessage,
 } from "@/lib/cambio-perfil-errors";
+import { renderInlineStrong } from "@/lib/render-inline-strong";
+import { interpolate } from "@/lib/interpolate";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
 import {
   clampEmbedText,
@@ -65,6 +67,8 @@ export function CambioPerfilFlow({
   /** Solo embed: query para enlaces `/embed/guia` (p. ej. `?label=…&identityId=…`). */
   guiaEmbedQuerySuffix?: string;
 }) {
+  const { messages } = useI18n();
+  const t = messages.flow;
   const [step, setStep] = useState<Step>("notice");
   const [oldCountryIso, setOldCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [oldNational, setOldNational] = useState("");
@@ -100,7 +104,7 @@ export function CambioPerfilFlow({
       const custom = customRaw
         ? clampEmbedText(customRaw, 500)
         : undefined;
-      setError(resolveCambioPerfilErrorMessage(code, custom));
+      setError(resolveCambioPerfilErrorMessage(code, messages.errors, custom));
       const s = raw.step;
       if (s === "apps" || s === "notice" || s === "metamap") {
         setStep(s);
@@ -108,7 +112,7 @@ export function CambioPerfilFlow({
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [messages.errors]);
 
   useEffect(() => {
     return () => {
@@ -161,11 +165,11 @@ export function CambioPerfilFlow({
       e.preventDefault();
       setError(null);
       if (!oldFormatOk || !newFormatOk) {
-        setError(CAMBIO_PERFIL_ERROR_MESSAGES.INVALID_NUMBER_FORMAT);
+        setError(messages.errors.INVALID_NUMBER_FORMAT);
         return;
       }
       if (oldE164 === newE164) {
-        setError(CAMBIO_PERFIL_ERROR_MESSAGES.DUPLICATE_APP_NUMBERS);
+        setError(messages.errors.DUPLICATE_APP_NUMBERS);
         return;
       }
       setStep("metamap");
@@ -185,6 +189,7 @@ export function CambioPerfilFlow({
       newE164,
       oldCountryIso,
       newCountryIso,
+      messages.errors,
     ],
   );
 
@@ -272,7 +277,7 @@ export function CambioPerfilFlow({
       {step === "notice" && (
         <div className="space-y-4 sm:space-y-5">
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Cambio de número de app
+            {t.noticeH1}
           </h1>
 
           <div
@@ -280,15 +285,10 @@ export function CambioPerfilFlow({
             role="note"
           >
             <p className="text-sm font-semibold text-amber-950">
-              Importante: migración de datos
+              {t.noticeAmberTitle}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-amber-950/90">
-              La información y el historial asociados a tu{" "}
-              <strong>número de app anterior</strong> en Punto Pago serán{" "}
-              <strong>migrados</strong> al <strong>número de app nuevo</strong>{" "}
-              que indiques en el siguiente paso. Asegúrate de que ambos números
-              son correctos; aquí solo registramos y autorizas ese cambio de
-              perfil.
+              {renderInlineStrong(t.noticeAmberBody)}
             </p>
           </div>
 
@@ -297,14 +297,9 @@ export function CambioPerfilFlow({
             role="note"
           >
             <p className="font-semibold text-[#0B0B13]">
-              Límite de cambios de perfil
+              {t.noticeLimitTitle}
             </p>
-            <p className="mt-2">
-              Solo puedes realizar un <strong>cambio de perfil</strong> (migración
-              de número) <strong>una vez cada 2 meses</strong>. Úsalo cuando
-              realmente vayas a quedarte con el número nuevo; no está pensado
-              para cambiar de número con frecuencia.
-            </p>
+            <p className="mt-2">{renderInlineStrong(t.noticeLimitBody)}</p>
           </div>
 
           <CambioPerfilFlowGuideTeaser
@@ -313,8 +308,7 @@ export function CambioPerfilFlow({
           />
 
           <p className="text-sm leading-relaxed text-slate-600">
-            Después indicarás el número de app anterior y el nuevo, y completarás
-            una verificación de identidad con documento vigente y selfie.
+            {t.noticeFooter}
             {merchantLabel ? (
               <>
                 {" "}
@@ -326,7 +320,7 @@ export function CambioPerfilFlow({
           </p>
 
           <button type="button" onClick={() => setStep("apps")} className={btnPrimary}>
-            Entendido, continuar
+            {t.btnUnderstood}
           </button>
         </div>
       )}
@@ -335,20 +329,17 @@ export function CambioPerfilFlow({
         <form className="space-y-5" onSubmit={onSubmitApps}>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-              Datos de tus apps en Punto Pago
+              {t.appsH1}
             </h1>
             <p className="mt-2 text-left text-sm leading-relaxed text-slate-600 hyphens-none text-pretty sm:hyphens-auto sm:text-justify">
-              Los datos del app anterior se migrarán al número nuevo. Indica ambos
-              números; por defecto el país es Panamá (+507) y puedes cambiar el
-              país en cada campo si aplica. Recuerda:{" "}
-              <strong>un cambio de perfil cada 2 meses como máximo</strong>.
+              {renderInlineStrong(t.appsIntro)}
             </p>
           </div>
 
           <AppNumberField
             id="old-app"
-            label="Número de app anterior"
-            description="El número vinculado a tu servicio Punto Pago antes del cambio."
+            label={t.oldFieldLabel}
+            description={t.oldFieldDesc}
             countryIso={oldCountryIso}
             onCountryIso={setOldCountryIso}
             nationalDigits={oldNational}
@@ -358,8 +349,8 @@ export function CambioPerfilFlow({
 
           <AppNumberField
             id="new-app"
-            label="Número de app nuevo"
-            description="El número de app al que se migrará tu perfil y datos."
+            label={t.newFieldLabel}
+            description={t.newFieldDesc}
             countryIso={newCountryIso}
             onCountryIso={setNewCountryIso}
             nationalDigits={newNational}
@@ -380,14 +371,14 @@ export function CambioPerfilFlow({
               onClick={() => setStep("notice")}
               className={btnSecondary}
             >
-              Volver al aviso
+              {t.btnBackNotice}
             </button>
             <button
               type="submit"
               disabled={!canContinueApps}
               className={btnPrimaryCompact}
             >
-              Continuar
+              {t.btnContinue}
             </button>
           </div>
         </form>
@@ -396,21 +387,15 @@ export function CambioPerfilFlow({
       {step === "metamap" && (
         <div className="space-y-5">
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Verificación de identidad
+            {t.metamapH1}
           </h1>
           <p className="break-words text-sm leading-relaxed text-slate-600">
-            Quedó registrada la migración de{" "}
-            <span className="inline-block max-w-full font-mono font-medium text-slate-800">
-              {oldE164}
-            </span>{" "}
-            a{" "}
-            <span className="inline-block max-w-full font-mono font-medium text-slate-800">
-              {newE164}
-            </span>
-            . Para completar el cambio de perfil debemos confirmar que eres tú:
-            ten a mano un <strong>documento de identidad vigente</strong>, pulsa
-            el botón de abajo y sigue los pasos en pantalla (incluye una{" "}
-            <strong>foto tipo selfie</strong>).
+            {renderInlineStrong(
+              interpolate(t.metamapIntro, {
+                old: oldE164,
+                new: newE164,
+              }),
+            )}
           </p>
           {matiIdentityId ? (
             <ProfileMetamapButton
@@ -423,19 +408,9 @@ export function CambioPerfilFlow({
               className="rounded-xl border border-amber-200/90 bg-amber-50/90 p-4 text-sm text-amber-950"
               role="alert"
             >
-              <p className="font-semibold">Configuración de verificación</p>
+              <p className="font-semibold">{t.metamapConfigTitle}</p>
               <p className="mt-2 leading-relaxed">
-                Falta el <strong>identityId</strong> de Mati. El sistema que
-                incrusta esta página debe crear la identidad en Mati y pasarla en
-                la URL del embed (por ejemplo{" "}
-                <code className="rounded bg-amber-100/80 px-1 font-mono text-xs">
-                  ?identityId=…
-                </code>
-                ) o definir{" "}
-                <code className="rounded bg-amber-100/80 px-1 font-mono text-xs">
-                  NEXT_PUBLIC_METAMAP_IDENTITY_ID
-                </code>{" "}
-                solo en entornos de prueba.
+                {renderInlineStrong(t.metamapConfigBody)}
               </p>
             </div>
           )}
@@ -448,7 +423,7 @@ export function CambioPerfilFlow({
             }}
             className={btnSecondary}
           >
-            Volver y editar números
+            {t.metamapBack}
           </button>
         </div>
       )}
@@ -466,15 +441,11 @@ export function CambioPerfilFlow({
             ✓
           </div>
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            Cambio de perfil completado
+            {t.doneH1}
           </h1>
-          <p className="text-sm text-slate-600">
-            Tu identidad quedó validada y la migración entre números quedó
-            registrada. Puedes seguir usando la aplicación Punto Pago con tu
-            número nuevo.
-          </p>
+          <p className="text-sm text-slate-600">{t.doneBody}</p>
           <p className="break-words text-xs text-slate-500">
-            Números:{" "}
+            {t.doneNumbersLabel}{" "}
             <span className="font-mono text-slate-700">{oldE164}</span>
             {" → "}
             <span className="font-mono text-slate-700">{newE164}</span>

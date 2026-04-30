@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/i18n-context";
 import { parseSafeMetamapCallbackId } from "@/lib/embed-security";
 import { getMetamapPublicConfig } from "@/lib/metamap-public-config";
 
@@ -30,6 +31,8 @@ export function ProfileMetamapButton({
   onComplete,
   onUserStartedSdk,
 }: Props) {
+  const { messages } = useI18n();
+  const ui = messages.metamapUi;
   const cfg = getMetamapPublicConfig();
   const [scriptReady, setScriptReady] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -112,17 +115,14 @@ export function ProfileMetamapButton({
     btn.setAttribute("identityId", identityId);
     btn.className =
       "absolute inset-0 z-20 min-h-14 min-w-0 w-full cursor-pointer opacity-0 sm:min-h-[52px]";
-    btn.setAttribute(
-      "aria-label",
-      "Abrir verificación de identidad con documento vigente y selfie",
-    );
+    btn.setAttribute("aria-label", ui.matiAria);
     host.appendChild(btn);
     const detach = attachListeners(btn);
     return () => {
       detach();
       host.replaceChildren();
     };
-  }, [scriptReady, cfg.clientId, cfg.flowId, identityId, attachListeners]);
+  }, [scriptReady, cfg.clientId, cfg.flowId, identityId, attachListeners, ui.matiAria]);
 
   return (
     <div className="space-y-3">
@@ -143,11 +143,11 @@ export function ProfileMetamapButton({
           className="pointer-events-none relative z-10 flex w-full min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4749B6] to-[#3B3DA6] px-5 py-4 text-base font-bold text-white shadow-lg shadow-[#4749B6]/30 sm:min-h-[52px] sm:px-6"
           tabIndex={-1}
         >
-          Verificar identidad
+          {ui.btn}
         </button>
         {!scriptReady ? (
           <p className="mt-2 text-center text-xs text-slate-500">
-            Cargando verificación…
+            {ui.loading}
           </p>
         ) : null}
       </div>

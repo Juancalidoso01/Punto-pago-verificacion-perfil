@@ -1,21 +1,22 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { PpAmbient } from "@/components/pp-ambient";
+import { PpLangSwitcher } from "@/components/pp-lang-switcher";
+import { useI18n } from "@/i18n/i18n-context";
 
 const BUSINESS_HUB_URL = "https://puntopago.net/business/paymentshub/";
 
 type PpAppChromeProps = {
   children: ReactNode;
-  /** Subtítulo bajo “Punto Pago” (ej. contexto del flujo) */
-  subtitle?: string;
   /** Texto opcional en el pie del encabezado */
   headerDetail?: ReactNode;
 };
 
-export function PpAppChrome({
-  children,
-  subtitle = "Cambio de perfil · Migración de número",
-  headerDetail,
-}: PpAppChromeProps) {
+export function PpAppChrome({ children, headerDetail }: PpAppChromeProps) {
+  const { messages } = useI18n();
+  const c = messages.chrome;
+
   return (
     <div className="pp-page-bg relative flex min-h-dvh min-h-[100dvh] flex-col">
       <PpAmbient />
@@ -38,7 +39,7 @@ export function PpAppChrome({
                 Punto Pago
               </span>
               <span className="mt-0.5 block text-[11px] font-medium text-slate-500">
-                {subtitle}
+                {c.subtitle}
               </span>
               {headerDetail ? (
                 <span className="mt-2 block text-sm leading-snug text-slate-700">
@@ -47,14 +48,15 @@ export function PpAppChrome({
               ) : null}
             </span>
           </a>
-          <nav className="flex shrink-0 flex-wrap items-center justify-end gap-1 sm:flex-nowrap">
+          <nav className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
+            <PpLangSwitcher />
             <a
               href={BUSINESS_HUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="pp-touch inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-[#4749B6] sm:min-h-0 sm:min-w-0 sm:px-3 sm:text-sm"
             >
-              Business
+              {c.business}
             </a>
             <a
               href="https://puntopago.net/"
@@ -62,7 +64,7 @@ export function PpAppChrome({
               rel="noopener noreferrer"
               className="pp-touch inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-[#4749B6] sm:min-h-0 sm:min-w-0 sm:px-3 sm:text-sm"
             >
-              Sitio principal
+              {c.mainSite}
             </a>
           </nav>
         </div>
@@ -78,16 +80,16 @@ export function PpAppChrome({
 
       <footer className="relative z-0 mt-auto border-t border-white/50 bg-white/55 pl-[calc(1rem+env(safe-area-inset-left,0px))] pr-[calc(1rem+env(safe-area-inset-right,0px))] pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] text-center text-xs text-slate-500 backdrop-blur-md sm:py-8 sm:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         <p>
-          <span className="font-medium text-slate-600">Grupo Punto Pago</span>
+          <span className="font-medium text-slate-600">{c.footerBrand}</span>
           {" · "}
-          Cambio de perfil y migración de número.{" "}
+          {c.footerLine}{" "}
           <a
             href="https://puntopago.net/"
             target="_blank"
             rel="noopener noreferrer"
             className="pp-touch inline-flex min-h-11 items-center justify-center font-medium text-[#4749B6] underline-offset-2 hover:underline sm:min-h-0"
           >
-            puntopago.net
+            {c.footerLinkLabel}
           </a>
         </p>
       </footer>

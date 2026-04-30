@@ -59,7 +59,7 @@
  * `NEXT_PUBLIC_POST_MESSAGE_TARGET_ORIGIN`, se intenta usar el origen de `document.referrer`
  * cuando sea de confianza; si no, `*`.
  *
- * Códigos recomendados (textos en `CAMBIO_PERFIL_ERROR_MESSAGES`):
+ * Códigos recomendados (textos i18n en `AppMessages['errors']`):
  * - `OLD_APP_NUMBER_NOT_FOUND` — número anterior no existe.
  * - `OLD_APP_NUMBER_NO_PROFILE` — sin perfil previo Punto Pago en ese número.
  * - `PROFILE_CHANGE_ALREADY_REGISTERED` — ya hay cambio registrado / política de 2 meses.
