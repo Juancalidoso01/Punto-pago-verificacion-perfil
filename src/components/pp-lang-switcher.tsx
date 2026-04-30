@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import type { Locale } from "@/i18n/types";
 import { LOCALES } from "@/i18n/types";
 import { useI18n } from "@/i18n/i18n-context";
@@ -14,7 +14,7 @@ function hrefWithLang(pathname: string, search: string, lang: Locale) {
   return `${pathname}${s ? `?${s}` : ""}`;
 }
 
-export function PpLangSwitcher({ className = "" }: { className?: string }) {
+function PpLangSwitcherInner({ className = "" }: { className?: string }) {
   const { locale, messages } = useI18n();
   const pathname = usePathname() || "/";
   const sp = useSearchParams();
@@ -45,5 +45,21 @@ export function PpLangSwitcher({ className = "" }: { className?: string }) {
         );
       })}
     </div>
+  );
+}
+
+/** `useSearchParams` requiere un padre `Suspense` (recomendación Next.js / evita errores de render). */
+export function PpLangSwitcher({ className = "" }: { className?: string }) {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className={`flex h-9 min-w-[5.5rem] animate-pulse rounded-lg border border-slate-200/80 bg-slate-100/80 sm:h-8 ${className}`}
+          aria-hidden
+        />
+      }
+    >
+      <PpLangSwitcherInner className={className} />
+    </Suspense>
   );
 }

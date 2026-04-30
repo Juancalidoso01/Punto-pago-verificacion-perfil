@@ -65,7 +65,8 @@ export type AppMessages = {
     formatOkTitle: string;
     formatOkAria: string;
     duplicateUnderField: string;
-    countryAria: (label: string) => string;
+    /** Plantilla con `{{label}}` para `aria-label` del selector de país. */
+    countryAriaTemplate: string;
   };
   migration: {
     title: string;
@@ -85,7 +86,8 @@ export type AppMessages = {
       title: string;
       subtitle: string;
       stepGeneral: string;
-      stepN: (n: number) => string;
+      /** Plantilla con `{{n}}` (número de paso, 1-based tras el ítem “General”). */
+      stepNLabel: string;
       backendCardTitle: string;
       backendCardDesc: string;
       backendCardCta: string;

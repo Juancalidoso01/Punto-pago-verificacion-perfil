@@ -66,7 +66,7 @@ export const ruMessages: AppMessages = {
     formatOkTitle: "Корректный формат",
     formatOkAria: "Корректный формат",
     duplicateUnderField: "Должен отличаться от прежнего номера приложения.",
-    countryAria: (label: string) => `Страна или префикс для ${label}`,
+    countryAriaTemplate: "Страна или префикс для {{label}}",
   },
   migration: {
     title: "Анализируем ваши данные",
@@ -93,7 +93,7 @@ export const ruMessages: AppMessages = {
       subtitle:
         "Выберите шаг для подробностей. На каждой странице можно вернуться к оглавлению или к основному потоку смены профиля.",
       stepGeneral: "Обзор",
-      stepN: (n: number) => `Шаг ${n}`,
+      stepNLabel: "Шаг {{n}}",
       backendCardTitle: "Интеграция бэкенда · Mati / MetaMap",
       backendCardDesc:
         "HTML, postMessage и пример связи с API проверок через **identityId** и **verificationId**.",

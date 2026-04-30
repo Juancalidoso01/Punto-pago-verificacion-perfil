@@ -67,7 +67,7 @@ export const esMessages: AppMessages = {
     formatOkTitle: "Formato válido",
     formatOkAria: "Formato válido",
     duplicateUnderField: "Debe ser distinto al número de app anterior.",
-    countryAria: (label: string) => `País o prefijo para ${label}`,
+    countryAriaTemplate: "País o prefijo para {{label}}",
   },
   migration: {
     title: "Analizando tu información",
@@ -95,7 +95,7 @@ export const esMessages: AppMessages = {
       subtitle:
         "Elegí un paso para abrir su página de detalle. En cada una podés regresar al índice de la guía o al flujo principal de cambio de perfil.",
       stepGeneral: "General",
-      stepN: (n: number) => `Paso ${n}`,
+      stepNLabel: "Paso {{n}}",
       backendCardTitle: "Integración backend · Mati / MetaMap",
       backendCardDesc:
         "HTML, postMessage y ejemplo de correlación con la API de verificaciones usando **identityId** y **verificationId**.",

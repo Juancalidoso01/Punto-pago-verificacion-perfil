@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/i18n/i18n-context";
+import { interpolate } from "@/lib/interpolate";
 import { DIAL_COUNTRIES, type DialCountry } from "@/lib/dial-countries";
 
 const selectClass =
@@ -85,7 +86,7 @@ export function AppNumberField({
             className={`${selectClass} ${selectStateClass}`}
             value={countryIso}
             onChange={(e) => onCountryIso(e.target.value)}
-            aria-label={f.countryAria(label)}
+            aria-label={interpolate(f.countryAriaTemplate, { label })}
             aria-invalid={duplicateError || undefined}
           >
             {DIAL_COUNTRIES.map((c: DialCountry) => (

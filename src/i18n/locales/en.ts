@@ -66,7 +66,7 @@ export const enMessages: AppMessages = {
     formatOkTitle: "Valid format",
     formatOkAria: "Valid format",
     duplicateUnderField: "Must be different from the previous app number.",
-    countryAria: (label: string) => `Country or prefix for ${label}`,
+    countryAriaTemplate: "Country or prefix for {{label}}",
   },
   migration: {
     title: "Analyzing your information",
@@ -93,7 +93,7 @@ export const enMessages: AppMessages = {
       subtitle:
         "Pick a step to open its detail page. On each page you can return to the guide index or the main profile-change flow.",
       stepGeneral: "Overview",
-      stepN: (n: number) => `Step ${n}`,
+      stepNLabel: "Step {{n}}",
       backendCardTitle: "Backend integration · Mati / MetaMap",
       backendCardDesc:
         "HTML, postMessage, and an example of correlating with the verifications API using **identityId** and **verificationId**.",
