@@ -287,6 +287,20 @@ export const esMessages: AppMessages = {
       "Aquí se describe el **contrato** entre el **iframe del widget**, la **app contenedora** y vuestro **backend**: qué validar en cuanto el usuario confirma los números, cómo obtener y exponer **identityId** antes del SDK, qué mensaje esperar al cerrar Mati y cómo **confirmar** la verificación en servidor antes de cerrar el trámite. En los ejemplos, lo resaltado marca datos que no deben improvisarse en producción.",
     backGuia: "← Índice de la guía",
     backFlow: "← Volver al flujo",
+    handoffTitle: "Qué compartir para que otro equipo desarrolle el proyecto aparte",
+    handoffBody:
+      "Como mínimo: **acceso al repositorio Git** (o copia acordada con historial); **Node.js** acorde al proyecto y comandos **`npm install`**, **`npm run dev`**, **`npm run build`**; **URL base desplegada** del widget (donde vive **`/embed`**) en staging y producción; variables públicas de build **`NEXT_PUBLIC_METAMAP_CLIENT_ID`** y **`NEXT_PUBLIC_METAMAP_FLOW_ID`** (sustituir los valores por defecto por los de **vuestra** cuenta MetaMap); opcional **`NEXT_PUBLIC_METAMAP_IDENTITY_ID`** solo para demos locales; **secretos de API Mati en servidor** (nunca en el cliente ni en el repo) para crear **`identityId`**; y acuerdo de **orígenes** si personalizáis quién puede enviar `flow_error` al iframe (ver **`embed-security.ts`**). Documentá también quién opera el **despliegue** (p. ej. Vercel) y las **URLs exactas** que el banco incrustará.",
+    uiTitle: "HTML, diseño visual y cómo ajustarlo junto al backend",
+    uiBody:
+      "El **marcado y los estilos** del flujo (botones, tipografía, colores, pasos) están en **este** proyecto Next.js: componentes en **`src/components`**, estilos globales y Tailwind. Si integráis solo un **`<iframe>`** hacia **`/embed`**, el aspecto **dentro** del marco lo controla el despliegue del widget; la app madre puede dar **ancho, alto, sombras y márgenes** alrededor, pero **no** puede aplicar CSS “de afuera” al contenido del iframe por **misma política de origen**. Para alinear marca (colores Punto Pago, textos, breakpoints), hace falta que alguien con **frontend** clone o bifurque **este repo** y adapte componentes o tokens. El equipo de **backend** suele encargarse del **HTML del contenedor** en su portal, la **URL del iframe** con query (`identityId`, `label`, etc.) y la **lógica** que escucha `postMessage`; el **diseño interior** del trámite se ajusta en el código del widget.",
+    codeHostIframeTitle: "HTML mínimo en la app padre (contenedor del iframe)",
+    codeHostIframe: `<!-- Sustituí el host y los query params según vuestro backend -->
+<iframe
+  [[HL]]title[[/HL]]="Cambio de perfil Punto Pago"
+  [[HL]]src[[/HL]]="https://[[HL]]tu-dominio-del-widget[[/HL]]/embed?[[HL]]identityId[[/HL]]=...&[[HL]]label[[/HL]]=..."
+  [[HL]]allow[[/HL]]="[[HL]]camera[[/HL]]"
+  style="width:100%;max-width:28rem;min-height:640px;border:0;display:block;margin:0 auto;"
+></iframe>`,
     s1Title: "1) Tras los números: validar negocio y crear o recuperar identidad en Mati",
     s1Body:
       "Al enviar el formulario de números, el iframe emite **`apps_submitted`**. Ese evento debe disparar en backend la comprobación del **número anterior** (existencia, perfil Punto Pago, políticas como el límite de un cambio cada 2 meses). Si todo es correcto, **creáis o recuperáis** la identidad en Mati y obtenéis el **identityId** que debe llegar al iframe en **`?identityId=…`** (o equivalente) **antes** de que el usuario abra el SDK. Sin ese valor, Mati no puede iniciar el flujo.",

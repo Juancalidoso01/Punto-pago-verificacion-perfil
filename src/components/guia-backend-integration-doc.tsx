@@ -39,6 +39,24 @@ export function GuiaBackendIntegrationDoc({
       </header>
 
       <section className="space-y-3">
+        <h2 className="text-base font-bold text-[#0B0B13]">{doc.handoffTitle}</h2>
+        <p className="text-sm leading-relaxed text-slate-600">
+          {renderInlineStrong(doc.handoffBody)}
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-[#0B0B13]">{doc.uiTitle}</h2>
+        <p className="text-sm leading-relaxed text-slate-600">
+          {renderInlineStrong(doc.uiBody)}
+        </p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {doc.codeHostIframeTitle}
+        </p>
+        <HighlightedCode code={doc.codeHostIframe} />
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-base font-bold text-[#0B0B13]">{doc.s1Title}</h2>
         <p className="text-sm leading-relaxed text-slate-600">
           {renderInlineStrong(doc.s1Body)}

@@ -273,6 +273,20 @@ export const enMessages: AppMessages = {
       "This document describes the **contract** between the **widget iframe**, the **host app**, and your **backend**: what to validate when numbers are submitted, how to obtain and expose **identityId** before the SDK, which message marks a finished Mati session, and how to **confirm** verification on the server before you treat migration as complete. Highlighted snippets mark values that must not be guessed in production.",
     backGuia: "← Guide index",
     backFlow: "← Back to flow",
+    handoffTitle: "What to hand off so another team can develop on their own",
+    handoffBody:
+      "At minimum: **Git repository access** (or an agreed copy with history); **Node.js** matching the project and **`npm install`**, **`npm run dev`**, **`npm run build`**; the **deployed base URL** of the widget (where **`/embed`** is served) for staging and production; public build vars **`NEXT_PUBLIC_METAMAP_CLIENT_ID`** and **`NEXT_PUBLIC_METAMAP_FLOW_ID`** (replace defaults with **your** MetaMap account values); optional **`NEXT_PUBLIC_METAMAP_IDENTITY_ID`** for local demos only; **Mati API secrets on the server** (never in the client or repo) to create **`identityId`**; and an agreement on **origins** if you customize who may send `flow_error` to the iframe (see **`embed-security.ts`**). Also document who runs **deployment** (e.g. Vercel) and the **exact URLs** the bank will embed.",
+    uiTitle: "HTML, visual design, and how backend and frontend split the work",
+    uiBody:
+      "The **markup and styles** for the flow (buttons, typography, colors, steps) live in **this** Next.js project: components under **`src/components`**, global CSS, and Tailwind. If you integrate only an **`<iframe>`** to **`/embed`**, the **inner** look is controlled by this widget deployment; the host app can set **width, height, shadows, and margins** around the frame, but **cannot** style iframe content from outside because of the **same-origin policy**. To match brand (Punto Pago colors, copy, breakpoints), someone with **frontend** skills should clone or fork **this repo** and adjust components or design tokens. **Backend** teams typically own the **container HTML** in their portal, the **iframe URL** with query params (`identityId`, `label`, etc.), and **`postMessage`** handling; **inside** the widget, visual tweaks happen in this codebase.",
+    codeHostIframeTitle: "Minimal host-page HTML (iframe container)",
+    codeHostIframe: `<!-- Replace the host and query string from your backend -->
+<iframe
+  [[HL]]title[[/HL]]="Punto Pago profile change"
+  [[HL]]src[[/HL]]="https://[[HL]]your-widget-domain[[/HL]]/embed?[[HL]]identityId[[/HL]]=...&[[HL]]label[[/HL]]=..."
+  [[HL]]allow[[/HL]]="[[HL]]camera[[/HL]]"
+  style="width:100%;max-width:28rem;min-height:640px;border:0;display:block;margin:0 auto;"
+></iframe>`,
     s1Title: "1) After numbers: run business checks, then create or fetch the Mati identity",
     s1Body:
       "When the user submits the numbers form, the iframe emits **`apps_submitted`**. Treat that as the signal to validate the **previous number** (existence, Punto Pago profile, policies such as the 2‑month change limit). If everything passes, **create or fetch** the Mati identity and obtain the **identityId** that must reach the iframe in **`?identityId=…`** (or equivalent) **before** the user opens the SDK. Without it, Mati cannot start.",

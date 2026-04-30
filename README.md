@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Punto Pago — verificación / cambio de perfil (widget)
 
-## Getting Started
+Next.js 15 (App Router) + React 19 + Tailwind 4. Incluye el flujo embebible en **`/embed`**, guía paso a paso y documentación técnica de integración.
 
-First, run the development server:
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Sitio con chrome: [http://localhost:3000](http://localhost:3000)  
+- Embed (iframe): [http://localhost:3000/embed](http://localhost:3000/embed)  
+- Guía e **documentación para backend / handoff**: [http://localhost:3000/guia/integracion-backend](http://localhost:3000/guia/integracion-backend)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build   # compilación de producción
+npm run start   # sirve el build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variables de entorno (públicas)
 
-## Learn More
+Definir en `.env.local` o en el proveedor de despliegue. Los valores por defecto de Mati en código son solo de demo; en producción usá los de **vuestra** cuenta MetaMap.
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Uso |
+|----------|-----|
+| `NEXT_PUBLIC_METAMAP_CLIENT_ID` | `clientid` del web button (visible en el cliente). |
+| `NEXT_PUBLIC_METAMAP_FLOW_ID` | `flowId` del flujo Mati (visible en el cliente). |
+| `NEXT_PUBLIC_METAMAP_IDENTITY_ID` | Opcional, **solo pruebas**: identidad fija; en real el `identityId` debe venir del backend vía query `?identityId=…`. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Los **secretos** de API Mati (crear identidades, consultar verificaciones) viven **solo en el servidor** del banco o integrador, nunca en este repo.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pasar el proyecto a otro equipo
 
-## Deploy on Vercel
+1. **Código**: acceso al repositorio o archivo acordado.  
+2. **Despliegue**: URL pública de `/embed` (staging y producción).  
+3. **Mati**: credenciales de cuenta, `clientId` / `flowId` públicos y claves de API en servidor.  
+4. **Contrato**: eventos `postMessage` y códigos de error — ver la página **Integración backend** en la guía (también en `/embed/guia/integracion-backend`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Quien ajuste **diseño dentro del iframe** debe trabajar en **este** repositorio (componentes y estilos). Quien integre en el portal del banco suele encargarse del **HTML del contenedor**, la **URL del iframe** y la escucha de mensajes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Más documentación
+
+- Plantilla Next.js: [nextjs.org/docs](https://nextjs.org/docs)

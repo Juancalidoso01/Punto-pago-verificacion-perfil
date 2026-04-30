@@ -128,6 +128,14 @@ export type AppMessages = {
     intro: string;
     backGuia: string;
     backFlow: string;
+    /** Qué entregar para que otro equipo siga el desarrollo (repo, env, Mati, despliegue). */
+    handoffTitle: string;
+    handoffBody: string;
+    /** HTML del padre vs diseño del widget dentro del iframe. */
+    uiTitle: string;
+    uiBody: string;
+    codeHostIframeTitle: string;
+    codeHostIframe: string;
     s1Title: string;
     s1Body: string;
     codePrepareTitle: string;
