@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" fill="none" role="img" aria-label="Apps step">
+  <rect width="360" height="300" rx="16" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <rect x="24" y="24" width="240" height="16" rx="4" fill="#0f172a" opacity="0.88"/>
+  <rect x="24" y="56" width="280" height="10" rx="2" fill="#94a3b8" opacity="0.45"/>
+  <rect x="24" y="92" width="312" height="72" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="40" y="108" width="88" height="28" rx="6" fill="#fff" stroke="#cbd5e1"/>
+  <rect x="140" y="108" width="180" height="28" rx="6" fill="#fff" stroke="#cbd5e1"/>
+  <text x="40" y="100" fill="#64748b" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9">Previous app</text>
+  <rect x="24" y="180" width="312" height="72" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="40" y="196" width="88" height="28" rx="6" fill="#fff" stroke="#cbd5e1"/>
+  <rect x="140" y="196" width="180" height="28" rx="6" fill="#fff" stroke="#cbd5e1"/>
+  <text x="40" y="188" fill="#64748b" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9">New app</text>
+  <rect x="24" y="268" width="120" height="36" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <rect x="216" y="268" width="120" height="36" rx="10" fill="#4749B6"/>
+</svg>

@@ -1,4 +1,5 @@
 import type { AppMessages } from "@/i18n/catalog";
+import { GUIA_FIGURE_SRC } from "@/i18n/guia-figure-paths";
 
 export const ruMessages: AppMessages = {
   chrome: {
@@ -106,6 +107,9 @@ export const ruMessages: AppMessages = {
       kicker: "Руководство по процессу",
     },
     pasoBody: {
+      figuresLabel: "Вид потока (wireframe)",
+      figuresFootnote:
+        "Опорные схемы. Их можно заменить реальными скриншотами (PNG/WebP) по тем же путям в public/guia/.",
       userFacing: "В приложении",
       postMessage: "Виджет → родитель (`postMessage`)",
       backend: "Бэкенд / родитель — когда запрашивать или действовать",
@@ -130,6 +134,14 @@ export const ruMessages: AppMessages = {
           "После `flow_ready` родитель может **создать или получить** `identityId` в Mati и обновить `src` iframe с `?identityId=…`, если его ещё нет.",
           "Слушайте `postMessage` с `source === \"punto-pago-cambio-perfil\"` на всём протяжении потока.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.overview,
+            alt: "Схема: родительское приложение и iframe с виджетом смены профиля",
+            caption:
+              "Связь между контейнером и embed — тот же паттерн, что в продакшене.",
+          },
+        ],
       },
       notice: {
         title: "1. Начальное предупреждение",
@@ -141,6 +153,14 @@ export const ruMessages: AppMessages = {
         widgetEmits: [],
         integrationHints: [
           "По желанию: аналитика или лог входа в поток (дополнительных событий виджета на этом шаге нет, кроме уже отправленного `flow_ready`).",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.notice,
+            alt: "Экран предупреждения: заголовок, блоки о переносе и лимите, справка внизу, основная кнопка",
+            caption:
+              "Реальный порядок: сначала трамвайные блоки и «Продолжить», документация — ниже.",
+          },
         ],
       },
       apps: {
@@ -164,6 +184,13 @@ export const ruMessages: AppMessages = {
           "Здесь или **до** перехода к Mati бэкенд может **проверить** номера (существование, профиль, правило 2 месяцев).",
           "При ошибке родитель шлёт `postMessage`: `source: \"punto-pago-cambio-perfil-host\"`, `type: \"flow_error\"`, `errorCode` и при необходимости `step: \"apps\"`.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.apps,
+            alt: "Форма: два блока номера (страна + цифры) и кнопки назад / продолжить",
+            caption: "Раскладка полей E.164 на шаге номеров.",
+          },
+        ],
       },
       metamap: {
         title: "3. Проверка Mati (SDK)",
@@ -185,6 +212,13 @@ export const ruMessages: AppMessages = {
         integrationHints: [
           "**Первый `identityId`** должен прийти из **вашего бэкенда** (создание в Mati) и попасть в iframe через query или тестовую конфигурацию.",
           "После `metamap_started` при необходимости коррелируйте сессию на сервере.",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.metamap,
+            alt: "Шаг проверки: сводка номеров и основная кнопка Mati",
+            caption: "Нужен валидный identityId; фиолетовая кнопка открывает MetaMap.",
+          },
         ],
       },
       "metamap-done": {
@@ -209,6 +243,14 @@ export const ruMessages: AppMessages = {
           "**Основная работа:** проверить `oldPhoneE164`, сопоставить с Mati, записать миграцию, запустить задачи и т.д.",
           "В продакшене можно заменить таймер UI реальным ответом бэкенда.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.metamapDone,
+            alt: "Схема: iframe отправляет verificationId и identityId родителю через postMessage",
+            caption:
+              "Ключевая точка интеграции: связать ID с бэкендом и Mati.",
+          },
+        ],
       },
       analyzing: {
         title: "5. Анализ на экране",
@@ -218,6 +260,13 @@ export const ruMessages: AppMessages = {
         integrationHints: [
           "Пока показывается анализ, бэкенд может **опрашивать статус** Mati, обновлять учётную запись, уведомлять другие системы.",
           "При отрицательном результате можно отправить `flow_error` в iframe до конца демо-таймера.",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.analyzing,
+            alt: "Экран ожидания: прогресс и напоминание не закрывать окно",
+            caption: "В демо фиксированная длительность; в проде — ответ сервера.",
+          },
         ],
       },
       done: {
@@ -241,6 +290,13 @@ export const ruMessages: AppMessages = {
         ],
         integrationHints: [
           "Обновить состояние в родительском приложении, закрыть модальное окно, обновить профиль и т.д.",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.done,
+            alt: "Финальный экран: галочка, заголовок и сводка по номерам",
+            caption: "Подтверждение пользователю после завершения потока в UI.",
+          },
         ],
       },
     },

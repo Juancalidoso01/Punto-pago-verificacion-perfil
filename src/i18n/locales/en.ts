@@ -1,4 +1,5 @@
 import type { AppMessages } from "@/i18n/catalog";
+import { GUIA_FIGURE_SRC } from "@/i18n/guia-figure-paths";
 
 export const enMessages: AppMessages = {
   chrome: {
@@ -106,6 +107,9 @@ export const enMessages: AppMessages = {
       kicker: "Process guide",
     },
     pasoBody: {
+      figuresLabel: "Flow view (wireframe)",
+      figuresFootnote:
+        "Reference diagrams. Replace with real screenshots (PNG/WebP) at the same paths under public/guia/.",
       userFacing: "In the app",
       postMessage: "Widget → parent (`postMessage`)",
       backend: "Backend / parent — when to query or act",
@@ -130,6 +134,14 @@ export const enMessages: AppMessages = {
           "After `flow_ready`, the parent may **create or fetch** `identityId` in Mati and update the iframe `src` with `?identityId=…` if it was not set yet.",
           "Keep listening to `postMessage` with `source === \"punto-pago-cambio-perfil\"` for the whole flow.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.overview,
+            alt: "Diagram: parent application containing an iframe that loads the profile-change widget",
+            caption:
+              "Visual relationship between the host app and the embed (same pattern as in production).",
+          },
+        ],
       },
       notice: {
         title: "1. Initial notice",
@@ -141,6 +153,14 @@ export const enMessages: AppMessages = {
         widgetEmits: [],
         integrationHints: [
           "Optional: analytics or logging that the user entered the flow (no extra widget event on this step besides `flow_ready` already emitted).",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.notice,
+            alt: "Initial notice screen: title, migration and limit callouts, doc block at the bottom, primary button",
+            caption:
+              "Real order: transactional content first (notices + continue); the guide sits below as reference only.",
+          },
         ],
       },
       apps: {
@@ -164,6 +184,13 @@ export const enMessages: AppMessages = {
           "Here or **before** allowing Mati, the backend can **validate** numbers (existence, prior profile, 2-month policy).",
           "If validation fails, the parent sends `postMessage` with `source: \"punto-pago-cambio-perfil-host\"`, `type: \"flow_error\"`, `errorCode` (see error catalog) and optionally `step: \"apps\"`.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.apps,
+            alt: "Form with two number blocks (country + digits) and back / continue actions",
+            caption: "Layout of the E.164 fields and buttons on the numbers step.",
+          },
+        ],
       },
       metamap: {
         title: "3. Mati verification (SDK)",
@@ -185,6 +212,13 @@ export const enMessages: AppMessages = {
         integrationHints: [
           "The **first `identityId`** must come from **your backend** (Mati creation) and reach the iframe via query or test env.",
           "After `metamap_started`, you can correlate the session on the backend if needed.",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.metamap,
+            alt: "Verification step: number summary and main button to open Mati",
+            caption: "The SDK needs a valid identityId; the purple button opens the MetaMap flow.",
+          },
         ],
       },
       "metamap-done": {
@@ -209,6 +243,14 @@ export const enMessages: AppMessages = {
           "**Main read/write:** validate `oldPhoneE164`, cross-check with Mati, record migration, trigger jobs, etc.",
           "In production you can replace the UI timer with a real backend response and finish earlier if you define a protocol.",
         ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.metamapDone,
+            alt: "Diagram: iframe sends verificationId and identityId to the parent via postMessage",
+            caption:
+              "Critical integration point: correlate these IDs with your backend and Mati.",
+          },
+        ],
       },
       analyzing: {
         title: "5. On-screen analysis",
@@ -218,6 +260,13 @@ export const enMessages: AppMessages = {
         integrationHints: [
           "While the UI shows analysis, the backend can **poll Mati status**, update the account, notify other systems, etc.",
           "If the result is negative, you can send `flow_error` to the iframe before the demo timer ends (if you add extra handling).",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.analyzing,
+            alt: "Waiting screen with progress bar and do-not-close hint",
+            caption: "Demo uses a fixed duration; production replaces this with server-driven state.",
+          },
         ],
       },
       done: {
@@ -241,6 +290,13 @@ export const enMessages: AppMessages = {
         ],
         integrationHints: [
           "Update state in the native / parent web app, close modal, refresh profile, etc.",
+        ],
+        figures: [
+          {
+            src: GUIA_FIGURE_SRC.done,
+            alt: "Final screen with success icon, title, and migrated numbers summary",
+            caption: "User-facing confirmation after the flow completes in the UI.",
+          },
         ],
       },
     },

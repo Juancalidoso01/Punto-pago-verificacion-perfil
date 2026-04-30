@@ -4,7 +4,7 @@
  * Los textos traducidos viven en `AppMessages['guide']['steps']`; use `buildFlowGuideNodes`.
  */
 
-import type { AppMessages } from "@/i18n/catalog";
+import type { AppMessages, GuideFigure } from "@/i18n/catalog";
 
 export type CambioPerfilGuideStepKey =
   | "notice"
@@ -34,6 +34,8 @@ export type CambioPerfilFlowGuideNode = {
    * correlacione con Mati o responda al usuario (p. ej. `flow_error`).
    */
   integrationHints: string[];
+  /** Diagramas o capturas (`/public/...`). */
+  figures?: GuideFigure[];
 };
 
 const GUIDE_NODE_ORDER = [
@@ -62,6 +64,7 @@ export function buildFlowGuideNodes(
       userFacing: block.userFacing,
       widgetEmits: block.widgetEmits,
       integrationHints: block.integrationHints,
+      figures: block.figures,
     };
   });
 }

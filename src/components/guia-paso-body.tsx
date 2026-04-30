@@ -10,6 +10,39 @@ export function GuiaPasoBody({ node }: { node: CambioPerfilFlowGuideNode }) {
 
   return (
     <div className="space-y-4 text-left text-sm text-slate-600">
+      {node.figures && node.figures.length > 0 ? (
+        <div className="rounded-xl border border-slate-200/90 bg-gradient-to-b from-slate-50/90 to-white/80 p-4 shadow-sm ring-1 ring-slate-100/80">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#4749B6]">
+            {lb.figuresLabel}
+          </p>
+          <div className="mt-3 grid gap-4">
+            {node.figures.map((fig) => (
+              <figure key={fig.src} className="m-0">
+                <div className="overflow-hidden rounded-lg border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- PNG/WebP/SVG locales en /public */}
+                  <img
+                    src={fig.src}
+                    alt={fig.alt}
+                    width={720}
+                    height={480}
+                    className="h-auto w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                {fig.caption ? (
+                  <figcaption className="mt-2 text-xs leading-relaxed text-slate-500">
+                    {fig.caption}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
+          <p className="mt-3 border-t border-slate-200/80 pt-3 text-[10px] leading-snug text-slate-400">
+            {lb.figuresFootnote}
+          </p>
+        </div>
+      ) : null}
       {node.userFacing.length > 0 ? (
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
