@@ -58,6 +58,9 @@ export const esMessages: AppMessages = {
     metamapDemoHint:
       "Sin **identityId** válido no se abre el SDK de Mati. Usá el botón de abajo para simular una verificación y ver el resto del flujo; en producción el integrador debe pasar `?identityId=…` o `NEXT_PUBLIC_METAMAP_IDENTITY_ID` en pruebas.",
     metamapDemoButton: "Continuar sin Mati (simular verificación)",
+    metamapSkipHint:
+      "Podés **verificar con documento y selfie** usando el botón de arriba, o bien—solo para **pruebas o integración**—omitir Mati y seguir con datos demo (no sustituye una verificación real en producción).",
+    metamapSkipButton: "Omitir verificación y continuar (demo)",
     doneH1: "Cambio de perfil completado",
     doneBody:
       "Tu identidad quedó validada y la migración entre números quedó registrada. Puedes seguir usando la aplicación Punto Pago con tu número nuevo.",

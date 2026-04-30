@@ -57,6 +57,9 @@ export const enMessages: AppMessages = {
     metamapDemoHint:
       "Without a valid **identityId**, the Mati SDK does not open. Use the button below to simulate a verification and walk through the rest of the flow; in production the embed must pass `?identityId=…` or `NEXT_PUBLIC_METAMAP_IDENTITY_ID` for tests.",
     metamapDemoButton: "Continue without Mati (simulate verification)",
+    metamapSkipHint:
+      "You can complete **ID verification** with the button above, **or**—only for **testing or integration**—skip Mati and continue with demo IDs (this does not replace real production verification).",
+    metamapSkipButton: "Skip verification and continue (demo)",
     doneH1: "Profile change completed",
     doneBody:
       "Your identity was validated and the number migration was recorded. You can keep using the Punto Pago app with your new number.",

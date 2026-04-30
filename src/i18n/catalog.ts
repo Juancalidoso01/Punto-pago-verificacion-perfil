@@ -70,6 +70,9 @@ export type AppMessages = {
     metamapBack: string;
     metamapDemoHint: string;
     metamapDemoButton: string;
+    /** Cuando hay SDK Mati: texto bajo el botón real para la opción de omitir (demo). */
+    metamapSkipHint: string;
+    metamapSkipButton: string;
     doneH1: string;
     doneBody: string;
     doneNumbersLabel: string;

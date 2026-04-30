@@ -427,11 +427,28 @@ export function CambioPerfilFlow({
             )}
           </p>
           {matiIdentityId ? (
-            <ProfileMetamapButton
-              identityId={matiIdentityId}
-              onComplete={onMetamapComplete}
-              onUserStartedSdk={onMetamapUserStarted}
-            />
+            <div className="space-y-5">
+              <ProfileMetamapButton
+                identityId={matiIdentityId}
+                onComplete={onMetamapComplete}
+                onUserStartedSdk={onMetamapUserStarted}
+              />
+              <div className="space-y-3 border-t border-slate-200/90 pt-5">
+                <div
+                  className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700"
+                  role="note"
+                >
+                  {renderInlineStrong(t.metamapSkipHint)}
+                </div>
+                <button
+                  type="button"
+                  onClick={onDemoMetamapContinue}
+                  className={btnSecondary}
+                >
+                  {t.metamapSkipButton}
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <div
