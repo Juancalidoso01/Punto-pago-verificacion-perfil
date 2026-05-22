@@ -36,8 +36,13 @@ Los **secretos** de API Mati no deben commitearse. En Vercel: **Settings → Env
 
 Desactivados por defecto; no cambian el flujo del widget (verificar u omitir sigue igual).
 
-1. En Vercel: `METAMAP_WEBHOOK_ENABLED=true` y `METAMAP_WEBHOOK_SECRET` (el mismo que configurás en MetaMap → Integration → Webhooks).
-2. URL del webhook: `https://<tu-deploy>/api/metamap/webhook`
+1. **MetaMap** → Integration → Webhooks:
+   - **Your webhook URL** → `https://<tu-deploy-vercel>/api/metamap/webhook`
+   - **Webhook secret** → generá o copiá el secret del dashboard (≥16 caracteres).
+2. **Vercel** → Settings → Environment Variables (mismo valor del secret, carácter por carácter):
+   - `METAMAP_WEBHOOK_ENABLED` = `true`
+   - `METAMAP_WEBHOOK_SECRET` = el **Webhook secret** de MetaMap (no uses `NEXT_PUBLIC_`; es solo servidor).
+3. **Redeploy** en Vercel tras guardar las variables.
 3. Guía interna: [/guia/webhooks-prueba](http://localhost:3000/guia/webhooks-prueba) (listado en memoria en local; en Vercel usá logs con filtro `metamap-webhook` o `METAMAP_WEBHOOK_DEBUG_TOKEN`).
 
 Especificación: [Webhook specifications](https://docs.metamap.com/docs/webhook-specifications).

@@ -84,10 +84,49 @@ export function GuiaMetamapWebhooksPrueba({
   return (
     <div className="space-y-6 text-sm leading-relaxed text-slate-700">
       <section className="space-y-2">
+        <h2 className="text-base font-bold text-[#0B0B13]">
+          Checklist MetaMap ↔ Vercel
+        </h2>
+        <table className="w-full border-collapse text-xs">
+          <thead>
+            <tr className="border-b border-slate-200 text-left text-slate-500">
+              <th className="py-2 pr-2">Campo en MetaMap</th>
+              <th className="py-2">Dónde va</th>
+            </tr>
+          </thead>
+          <tbody className="text-slate-800">
+            <tr className="border-b border-slate-100">
+              <td className="py-2 pr-2 font-medium">Your webhook URL</td>
+              <td className="py-2 break-all font-mono">{webhookUrl}</td>
+            </tr>
+            <tr className="border-b border-slate-100">
+              <td className="py-2 pr-2 font-medium">Webhook secret</td>
+              <td className="py-2">
+                Mismo texto en Vercel →{" "}
+                <code className="rounded bg-slate-100 px-1">METAMAP_WEBHOOK_SECRET</code>
+                {" "}(no es <code>NEXT_PUBLIC_</code>; solo servidor)
+              </td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-2 font-medium">Activar endpoint</td>
+              <td className="py-2">
+                Vercel → <code className="rounded bg-slate-100 px-1">METAMAP_WEBHOOK_ENABLED</code>{" "}
+                = <code>true</code> (Production y Preview si probás en preview)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="text-xs text-slate-500">
+          Después de guardar variables en Vercel, hacé <strong>Redeploy</strong> del
+          último deployment. Sin redeploy el servidor no ve los secretos nuevos.
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-base font-bold text-[#0B0B13]">URL para el dashboard</h2>
         <p>
-          En MetaMap → Integration → Webhooks, pegá esta URL (mismo proyecto que el
-          web button):
+          En MetaMap → Integration → Webhooks, en <strong>Your webhook URL</strong>{" "}
+          pegá (mismo proyecto que el web button):
         </p>
         <code className="block break-all rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
           {webhookUrl}
