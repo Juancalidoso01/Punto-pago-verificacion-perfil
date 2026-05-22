@@ -7,11 +7,21 @@ import {
 } from "@/lib/metamap-webhook-config";
 
 function resolvePublicOrigin(): string {
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "")}`;
   const site = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (site) return site.replace(/\/$/, "");
-  return "http://localhost:3000";
+
+  /** Dominio estable de producción (no usar VERCEL_URL: cambia en cada deploy). */
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (production) {
+    return `https://${production.replace(/^https?:\/\//, "")}`;
+  }
+
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel && !/-[a-z0-9]{8,}\.vercel\.app$/i.test(vercel)) {
+    return `https://${vercel.replace(/^https?:\/\//, "")}`;
+  }
+
+  return "https://punto-pago-verificacion-perfil.vercel.app";
 }
 
 export default function GuiaWebhooksPruebaPage() {
