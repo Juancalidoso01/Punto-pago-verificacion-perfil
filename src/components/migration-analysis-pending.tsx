@@ -1,25 +1,114 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/i18n-context";
+import { DEMO_METAMAP_VERIFICATION_ID } from "@/lib/cambio-perfil-demo-metamap";
 import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
+import type { MetamapVerificationUiStatus } from "@/lib/metamap-verification-status";
+import { isTerminalMetamapVerificationStatus } from "@/lib/metamap-verification-status";
+
+const POLL_INTERVAL_MS = 2_000;
+const MAX_POLL_MS = 90_000;
+const DEMO_WAIT_MS = 4_000;
 
 type Props = {
   oldPhoneE164: string;
   newPhoneE164: string;
+  verificationId: string;
+  onResolved: (status: MetamapVerificationUiStatus) => void;
 };
 
-/**
- * Pantalla de espera mientras el “sistema analiza” (demo: duración fija).
- * La barra usa animación CSS sincronizada con `MIGRATION_ANALYSIS_UI_MS`.
- */
 export function MigrationAnalysisPending({
   oldPhoneE164,
   newPhoneE164,
+  verificationId,
+  onResolved,
 }: Props) {
   const { messages } = useI18n();
   const m = messages.migration;
-  const durationSec = Math.round(MIGRATION_ANALYSIS_UI_MS / 1000);
+  const [uiStatus, setUiStatus] = useState<MetamapVerificationUiStatus>("processing");
+  const [statusLine, setStatusLine] = useState(m.statusProcessing);
+  const resolvedRef = useRef(false);
+  const statusRef = useRef<MetamapVerificationUiStatus>("processing");
+  const onResolvedRef = useRef(onResolved);
+  onResolvedRef.current = onResolved;
+
+  const isDemo = verificationId === DEMO_METAMAP_VERIFICATION_ID;
+  const durationMs = isDemo ? DEMO_WAIT_MS : MAX_POLL_MS;
+  const durationSec = Math.round(durationMs / 1000);
+
+  useEffect(() => {
+    resolvedRef.current = false;
+
+    if (isDemo) {
+      const t = setTimeout(() => {
+        if (!resolvedRef.current) {
+          resolvedRef.current = true;
+          onResolved("verified");
+        }
+      }, DEMO_WAIT_MS);
+      return () => clearTimeout(t);
+    }
+
+    let cancelled = false;
+    const started = Date.now();
+
+    const applyStatus = (status: MetamapVerificationUiStatus) => {
+      statusRef.current = status;
+      setUiStatus(status);
+      if (status === "verified") setStatusLine(m.statusVerified);
+      else if (status === "review_needed") setStatusLine(m.statusReviewNeeded);
+      else if (status === "rejected") setStatusLine(m.statusRejected);
+      else setStatusLine(m.statusProcessing);
+    };
+
+    const finish = (status: MetamapVerificationUiStatus) => {
+      if (resolvedRef.current || cancelled) return;
+      resolvedRef.current = true;
+      applyStatus(status);
+      onResolvedRef.current(status);
+    };
+
+    const poll = async () => {
+      try {
+        const res = await fetch(
+          `/api/metamap/verification-status?verificationId=${encodeURIComponent(verificationId)}`,
+          { cache: "no-store" },
+        );
+        const data = (await res.json()) as {
+          ok?: boolean;
+          status?: MetamapVerificationUiStatus;
+        };
+        if (cancelled || !data.ok || !data.status) return;
+        applyStatus(data.status);
+        if (isTerminalMetamapVerificationStatus(data.status)) {
+          finish(data.status);
+        }
+      } catch {
+        /* reintento en el siguiente intervalo */
+      }
+    };
+
+    void poll();
+    const interval = setInterval(() => {
+      if (Date.now() - started >= MAX_POLL_MS) {
+        clearInterval(interval);
+        const last = statusRef.current;
+        finish(last === "processing" ? "review_needed" : last);
+        return;
+      }
+      void poll();
+    }, POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+    // onResolved estable vía ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reiniciar solo al cambiar verificationId
+  }, [verificationId, isDemo, m.statusProcessing, m.statusVerified, m.statusReviewNeeded, m.statusRejected]);
+
   const tpl = m.body;
   const o = "{{old}}";
   const n = "{{new}}";
@@ -33,6 +122,15 @@ export function MigrationAnalysisPending({
         ? tpl.slice(io + o.length)
         : "";
   const suffix = in_ >= 0 ? tpl.slice(in_ + n.length) : "";
+
+  const statusBoxClass =
+    uiStatus === "verified"
+      ? "border-emerald-200/90 bg-emerald-50/90 text-emerald-950"
+      : uiStatus === "rejected"
+        ? "border-red-200/90 bg-red-50/90 text-red-950"
+        : uiStatus === "review_needed"
+          ? "border-amber-200/90 bg-amber-50/90 text-amber-950"
+          : "border-slate-200/90 bg-slate-50/90 text-slate-700";
 
   return (
     <div className="space-y-6 py-1">
@@ -53,12 +151,20 @@ export function MigrationAnalysisPending({
         </p>
       </div>
 
+      <div
+        className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${statusBoxClass}`}
+        role="status"
+        aria-live="polite"
+      >
+        {statusLine}
+      </div>
+
       <div className="space-y-2">
         <div
           className="pp-migration-analysis-track h-3 w-full overflow-hidden rounded-full bg-slate-200/90 shadow-inner"
           style={
             {
-              "--pp-analysis-ms": `${MIGRATION_ANALYSIS_UI_MS}ms`,
+              "--pp-analysis-ms": `${isDemo ? DEMO_WAIT_MS : MIGRATION_ANALYSIS_UI_MS}ms`,
             } as CSSProperties
           }
           role="progressbar"

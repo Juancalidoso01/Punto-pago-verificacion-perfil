@@ -67,6 +67,12 @@ export const enMessages: AppMessages = {
     doneH1: "Profile change completed",
     doneBody:
       "Your identity was validated and the number migration was recorded. You can keep using the Punto Pago app with your new number.",
+    doneReviewH1: "Verification under review",
+    doneReviewBody:
+      "We received your ID and selfie. A team must **review your case manually** before the profile change can finish. We will notify you when it continues; you do not need to submit verification again now.",
+    doneRejectedH1: "Identity not validated",
+    doneRejectedBody:
+      "Identity verification was **not approved**. Make sure your document is readable and valid and try again later, or contact Punto Pago support.",
     doneNumbersLabel: "Numbers:",
   },
   fields: {
@@ -82,6 +88,11 @@ export const enMessages: AppMessages = {
       "We are validating previous app number {{old}} in our systems and the identity verification linked to the migration to {{new}}. This may take up to one minute.",
     progressAria: "Analysis in progress, up to {{sec}} seconds",
     dontClose: "Do not close this window",
+    statusProcessing: "Checking your verification result…",
+    statusVerified: "Identity verified. Finishing migration registration…",
+    statusReviewNeeded:
+      "Your verification is **pending manual review**. We will continue once the team approves it.",
+    statusRejected: "Verification was not approved. Preparing summary…",
   },
   metamapUi: {
     btn: "Verify identity",

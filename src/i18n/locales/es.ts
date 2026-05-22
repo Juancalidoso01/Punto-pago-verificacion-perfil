@@ -68,6 +68,12 @@ export const esMessages: AppMessages = {
     doneH1: "Cambio de perfil completado",
     doneBody:
       "Tu identidad quedó validada y la migración entre números quedó registrada. Puedes seguir usando la aplicación Punto Pago con tu número nuevo.",
+    doneReviewH1: "Verificación en revisión",
+    doneReviewBody:
+      "Recibimos tu documento y selfie. Un equipo debe **revisar manualmente** tu caso antes de completar el cambio de perfil. Te avisaremos cuando el proceso continúe; no hace falta volver a enviar la verificación ahora.",
+    doneRejectedH1: "No pudimos validar la identidad",
+    doneRejectedBody:
+      "La verificación de identidad **no fue aprobada**. Revisá que el documento sea legible y vigente e intentá de nuevo más tarde, o contactá a soporte Punto Pago.",
     doneNumbersLabel: "Números:",
   },
   fields: {
@@ -83,6 +89,12 @@ export const esMessages: AppMessages = {
       "Estamos validando el número de app anterior {{old}} en nuestros sistemas y la verificación de identidad asociada a la migración hacia {{new}}. Esto puede tardar hasta un minuto.",
     progressAria: "Análisis en curso, hasta {{sec}} segundos",
     dontClose: "No cierres esta ventana",
+    statusProcessing: "Estamos consultando el resultado de tu verificación…",
+    statusVerified: "Identidad verificada. Finalizando el registro de la migración…",
+    statusReviewNeeded:
+      "Tu verificación quedó **pendiente de revisión manual**. Seguimos con el registro en cuanto el equipo la apruebe.",
+    statusRejected:
+      "La verificación no fue aprobada. Preparando el resumen…",
   },
   metamapUi: {
     btn: "Verificar identidad",

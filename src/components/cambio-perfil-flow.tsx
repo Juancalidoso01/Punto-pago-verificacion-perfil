@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -23,7 +22,7 @@ import {
   DEMO_METAMAP_IDENTITY_ID,
   DEMO_METAMAP_VERIFICATION_ID,
 } from "@/lib/cambio-perfil-demo-metamap";
-import { MIGRATION_ANALYSIS_UI_MS } from "@/lib/cambio-perfil-parent-events";
+import type { MetamapVerificationUiStatus } from "@/lib/metamap-verification-status";
 import {
   clampEmbedText,
   isAllowedParentMessageOrigin,
@@ -84,9 +83,12 @@ export function CambioPerfilFlow({
   const [newCountryIso, setNewCountryIso] = useState(DEFAULT_DIAL_ISO);
   const [newNational, setNewNational] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const analysisEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const [analysisMatiIds, setAnalysisMatiIds] = useState<{
+    verificationId: string;
+    identityId: string;
+  } | null>(null);
+  const [verificationOutcome, setVerificationOutcome] =
+    useState<MetamapVerificationUiStatus | null>(null);
 
   useEffect(() => {
     notifyParent({ type: "flow_ready" });
@@ -122,15 +124,6 @@ export function CambioPerfilFlow({
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [messages.errors]);
-
-  useEffect(() => {
-    return () => {
-      if (analysisEndTimerRef.current !== null) {
-        clearTimeout(analysisEndTimerRef.current);
-        analysisEndTimerRef.current = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (step !== "apps") return;
@@ -202,6 +195,57 @@ export function CambioPerfilFlow({
     ],
   );
 
+  const finishAnalysisWithStatus = useCallback(
+    (
+      ids: { verificationId: string; identityId: string },
+      status: MetamapVerificationUiStatus,
+    ) => {
+      const outcome =
+        status === "verified"
+          ? "success"
+          : status === "review_needed"
+            ? "review_needed"
+            : status === "rejected"
+              ? "rejected"
+              : "pending";
+
+      setVerificationOutcome(status);
+      setAnalysisMatiIds(null);
+
+      notifyParent({
+        type: "metamap_finished",
+        verificationId: ids.verificationId,
+        identityId: ids.identityId,
+        oldPhoneE164: oldE164,
+        newPhoneE164: newE164,
+        metamapStatus: status,
+      });
+
+      if (status === "verified") {
+        notifyParent({
+          type: "verification_succeeded",
+          oldPhoneE164: oldE164,
+          newPhoneE164: newE164,
+          metamapVerificationId: ids.verificationId,
+          metamapIdentityId: ids.identityId,
+        });
+      }
+
+      notifyParent({
+        type: "migration_analysis_complete",
+        outcome,
+        metamapStatus: status,
+        oldPhoneE164: oldE164,
+        newPhoneE164: newE164,
+        verificationId: ids.verificationId,
+        identityId: ids.identityId,
+      });
+
+      setStep("done");
+    },
+    [oldE164, newE164],
+  );
+
   const onMetamapComplete = useCallback(
     (ids: { verificationId: string; identityId: string }) => {
       const merchant = (merchantLabel ?? "").trim();
@@ -220,46 +264,26 @@ export function CambioPerfilFlow({
 
       notifyParent({
         type: "migration_analysis_started",
-        estimatedDurationMs: MIGRATION_ANALYSIS_UI_MS,
+        estimatedDurationMs: 90_000,
         oldPhoneE164: oldE164,
         newPhoneE164: newE164,
         verificationId: ids.verificationId,
         identityId: ids.identityId,
       });
 
+      setVerificationOutcome(null);
+      setAnalysisMatiIds(ids);
       setStep("analyzing");
-
-      if (analysisEndTimerRef.current !== null) {
-        clearTimeout(analysisEndTimerRef.current);
-      }
-      analysisEndTimerRef.current = setTimeout(() => {
-        analysisEndTimerRef.current = null;
-        notifyParent({
-          type: "metamap_finished",
-          verificationId: ids.verificationId,
-          identityId: ids.identityId,
-          oldPhoneE164: oldE164,
-          newPhoneE164: newE164,
-        });
-        notifyParent({
-          type: "verification_succeeded",
-          oldPhoneE164: oldE164,
-          newPhoneE164: newE164,
-          metamapVerificationId: ids.verificationId,
-          metamapIdentityId: ids.identityId,
-        });
-        notifyParent({
-          type: "migration_analysis_complete",
-          outcome: "success",
-          oldPhoneE164: oldE164,
-          newPhoneE164: newE164,
-          verificationId: ids.verificationId,
-          identityId: ids.identityId,
-        });
-        setStep("done");
-      }, MIGRATION_ANALYSIS_UI_MS);
     },
     [oldE164, newE164, oldCountryIso, newCountryIso, merchantLabel],
+  );
+
+  const onAnalysisResolved = useCallback(
+    (status: MetamapVerificationUiStatus) => {
+      if (!analysisMatiIds) return;
+      finishAnalysisWithStatus(analysisMatiIds, status);
+    },
+    [analysisMatiIds, finishAnalysisWithStatus],
   );
 
   const onMetamapUserStarted = useCallback(() => {
@@ -469,22 +493,46 @@ export function CambioPerfilFlow({
         </div>
       )}
 
-      {step === "analyzing" && (
+      {step === "analyzing" && analysisMatiIds ? (
         <MigrationAnalysisPending
           oldPhoneE164={oldE164}
           newPhoneE164={newE164}
+          verificationId={analysisMatiIds.verificationId}
+          onResolved={onAnalysisResolved}
         />
-      )}
+      ) : null}
 
       {step === "done" && (
         <div className="space-y-4 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl shadow-inner ring-1 ring-emerald-100">
-            ✓
+          <div
+            className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-inner ring-1 ${
+              verificationOutcome === "rejected"
+                ? "bg-red-50 text-red-700 ring-red-100"
+                : verificationOutcome === "review_needed"
+                  ? "bg-amber-50 text-amber-800 ring-amber-100"
+                  : "bg-emerald-50 text-emerald-700 ring-emerald-100"
+            }`}
+          >
+            {verificationOutcome === "rejected"
+              ? "!"
+              : verificationOutcome === "review_needed"
+                ? "…"
+                : "✓"}
           </div>
           <h1 className="text-lg font-bold tracking-tight text-[#0B0B13] sm:text-xl">
-            {t.doneH1}
+            {verificationOutcome === "review_needed"
+              ? t.doneReviewH1
+              : verificationOutcome === "rejected"
+                ? t.doneRejectedH1
+                : t.doneH1}
           </h1>
-          <p className="text-sm text-slate-600">{t.doneBody}</p>
+          <p className="text-sm text-slate-600">
+            {verificationOutcome === "review_needed"
+              ? t.doneReviewBody
+              : verificationOutcome === "rejected"
+                ? t.doneRejectedBody
+                : t.doneBody}
+          </p>
           <p className="break-words text-xs text-slate-500">
             {t.doneNumbersLabel}{" "}
             <span className="font-mono text-slate-700">{oldE164}</span>

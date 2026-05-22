@@ -6,6 +6,7 @@ import {
   readMetamapWebhookSecret,
 } from "@/lib/metamap-webhook-config";
 import { parseMetamapWebhookPayload } from "@/lib/metamap-webhook-parse";
+import { upsertVerificationStatusFromWebhook } from "@/lib/metamap-verification-status-store";
 import { pushMetamapWebhookEvent } from "@/lib/metamap-webhook-store";
 import { verifyMetamapWebhookSignature } from "@/lib/metamap-webhook-verify";
 
@@ -94,6 +95,7 @@ export async function POST(req: Request) {
   console.info(JSON.stringify(logLine));
 
   if (summary) {
+    upsertVerificationStatusFromWebhook(summary, payload);
     pushMetamapWebhookEvent({
       id,
       receivedAt,

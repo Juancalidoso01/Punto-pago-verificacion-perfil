@@ -186,3 +186,56 @@ export async function createMatiIdentityForVerification(input: {
 export function isMatiServerProvisioningEnabled(): boolean {
   return Boolean(readClientSecret());
 }
+
+/** GET /v2/verifications/{id} — estado definitivo (complementa webhooks). */
+export async function fetchMatiVerificationSnapshot(
+  verificationId: string,
+): Promise<{
+  rawStatus: string;
+  matiDashboardUrl?: string;
+} | null> {
+  const creds = getServerMatiCredentials();
+  if (!creds) return null;
+
+  const id = verificationId.trim();
+  if (!isValidMatiHexIdentityId(id)) return null;
+
+  const token = await fetchMatiAccessToken(creds);
+  const urls = [
+    `${apiBase()}${VERIFICATIONS_PATH}/${id}`,
+    `https://api.getmati.com/v2/verifications/${id}`,
+    `https://api.prod.metamap.com/v2/verifications/${id}`,
+  ];
+
+  for (const url of urls) {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    const json = await parseJsonSafe(res);
+    if (!res.ok) continue;
+
+    const identity =
+      json.identity && typeof json.identity === "object"
+        ? (json.identity as Record<string, unknown>)
+        : null;
+    const rawStatus = String(
+      json.identityStatus ??
+        json.status ??
+        json.state ??
+        identity?.status ??
+        identity?.state ??
+        "",
+    ).trim();
+    const matiDashboardUrl = String(json.matiDashboardUrl ?? "").trim();
+
+    if (rawStatus) {
+      return {
+        rawStatus,
+        matiDashboardUrl: matiDashboardUrl || undefined,
+      };
+    }
+  }
+
+  return null;
+}

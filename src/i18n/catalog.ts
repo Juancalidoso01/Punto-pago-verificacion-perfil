@@ -69,6 +69,10 @@ export type AppMessages = {
     metamapProvisionRetry: string;
     doneH1: string;
     doneBody: string;
+    doneReviewH1: string;
+    doneReviewBody: string;
+    doneRejectedH1: string;
+    doneRejectedBody: string;
     doneNumbersLabel: string;
   };
   fields: {
@@ -84,6 +88,10 @@ export type AppMessages = {
     body: string;
     progressAria: string;
     dontClose: string;
+    statusProcessing: string;
+    statusVerified: string;
+    statusReviewNeeded: string;
+    statusRejected: string;
   };
   metamapUi: {
     btn: string;
