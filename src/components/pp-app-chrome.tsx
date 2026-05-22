@@ -50,7 +50,7 @@ export function PpAppChrome({ children, headerDetail }: PpAppChromeProps) {
               </span>
             </a>
 
-            <nav className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <nav className="relative z-[60] flex shrink-0 items-center gap-2 sm:gap-3">
               <PpLangSwitcher />
               <a
                 href={BUSINESS_HUB_URL}

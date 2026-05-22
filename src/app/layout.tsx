@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { I18nProvider } from "@/i18n/i18n-context";
 import { getLocale } from "@/i18n/get-locale";
-import { getAppMessages } from "@/i18n/messages";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -43,7 +42,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = getAppMessages(locale);
   const htmlLang = locale === "ru" ? "ru" : locale === "en" ? "en" : "es";
 
   return (
@@ -51,7 +49,7 @@ export default async function RootLayout({
       <body
         className={`${plusJakarta.variable} ${geistMono.variable} min-h-dvh overflow-x-clip bg-[var(--background)] font-sans text-[var(--foreground)] antialiased`}
       >
-        <I18nProvider locale={locale} messages={messages}>
+        <I18nProvider initialLocale={locale}>
           {children}
         </I18nProvider>
       </body>
