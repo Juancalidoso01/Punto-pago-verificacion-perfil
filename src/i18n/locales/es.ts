@@ -63,7 +63,7 @@ export const esMessages: AppMessages = {
     metamapProvisionLoading:
       "Preparando la verificación en Mati (documento y selfie)…",
     metamapProvisionFailed:
-      "No se pudo crear la identidad en Mati. Configurá **MATI_CLIENT_SECRET** en el servidor (ver `.env.example`) o usá la simulación. Mati puede rechazar el trámite después si aún no tenéis validación de número en backend.",
+      "No se pudo crear la identidad en Mati. En Vercel (o `.env.local`) agregá **MATI_CLIENT_SECRET** con el Client Secret del dashboard MetaMap → Integration (mismo proyecto que el **Client ID** del botón). Debajo aparece el detalle técnico. Si no, usá la simulación.",
     metamapProvisionRetry: "Reintentar abrir Mati",
     doneH1: "Cambio de perfil completado",
     doneBody:

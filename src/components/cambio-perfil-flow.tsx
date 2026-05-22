@@ -160,12 +160,16 @@ export function CambioPerfilFlow({
   const [metamapProvisionState, setMetamapProvisionState] = useState<
     "idle" | "loading" | "error"
   >("idle");
+  const [metamapProvisionError, setMetamapProvisionError] = useState<
+    string | null
+  >(null);
 
   const matiIdentityId = matiIdentityIdFromQuery ?? provisionedIdentityId;
 
   const provisionMatiIdentity = useCallback(async () => {
     if (matiIdentityIdFromQuery) return;
     setMetamapProvisionState("loading");
+    setMetamapProvisionError(null);
     try {
       const res = await fetch("/api/metamap/ensure-identity", {
         method: "POST",
@@ -179,21 +183,31 @@ export function CambioPerfilFlow({
       const data = (await res.json()) as {
         identityId?: string;
         error?: string;
+        code?: string;
       };
       if (!res.ok || !data.identityId) {
         setMetamapProvisionState("error");
+        setMetamapProvisionError(
+          data.error ??
+            (data.code === "MATI_PROVISIONING_DISABLED"
+              ? "Falta MATI_CLIENT_SECRET en el servidor (Vercel → Environment Variables)."
+              : `Error ${res.status} al crear identidad en Mati`),
+        );
         return;
       }
       setProvisionedIdentityId(data.identityId);
       setMetamapProvisionState("idle");
+      setMetamapProvisionError(null);
     } catch {
       setMetamapProvisionState("error");
+      setMetamapProvisionError("No se pudo contactar al servidor del widget.");
     }
   }, [matiIdentityIdFromQuery, oldE164, oldNational, newNational]);
 
   useEffect(() => {
     setProvisionedIdentityId(null);
     setMetamapProvisionState("idle");
+    setMetamapProvisionError(null);
   }, [oldE164, newE164]);
 
   useEffect(() => {
@@ -502,6 +516,11 @@ export function CambioPerfilFlow({
                 role="alert"
               >
                 {renderInlineStrong(t.metamapProvisionFailed)}
+                {metamapProvisionError ? (
+                  <span className="mt-2 block font-mono text-xs font-normal text-amber-900/90">
+                    {metamapProvisionError}
+                  </span>
+                ) : null}
               </p>
               <button
                 type="button"

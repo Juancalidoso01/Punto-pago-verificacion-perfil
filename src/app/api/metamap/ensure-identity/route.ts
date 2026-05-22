@@ -32,17 +32,28 @@ export async function POST(request: Request) {
     128,
   ).trim();
 
+  const clientIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip")?.trim() ??
+    "127.0.0.1";
+
   try {
     const { identityId } = await createMatiIdentityForVerification({
       externalId: externalId || `pp-test-${Date.now()}`,
+      clientIp,
     });
     return NextResponse.json({ identityId });
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to create Mati identity";
+    const code =
+      message.includes("no está configurado") ||
+      message.includes("not configured")
+        ? "MATI_PROVISIONING_DISABLED"
+        : "MATI_PROVISIONING_FAILED";
     return NextResponse.json(
-      { error: message, code: "MATI_PROVISIONING_FAILED" },
-      { status: 502 },
+      { error: message, code },
+      { status: code === "MATI_PROVISIONING_DISABLED" ? 503 : 502 },
     );
   }
 }
