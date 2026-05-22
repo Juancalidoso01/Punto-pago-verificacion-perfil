@@ -32,7 +32,7 @@ function PpLangSwitcherInner({ className = "" }: { className?: string }) {
           <Link
             key={l}
             href={hrefWithLang(pathname, search, l)}
-            className={`pp-touch min-h-9 min-w-9 rounded-md px-2 py-1.5 text-center sm:min-h-0 sm:min-w-0 sm:px-2 sm:py-1 ${
+            className={`pp-touch min-h-8 min-w-8 rounded-md px-1.5 py-1 text-center sm:min-h-0 sm:min-w-0 sm:px-2 sm:py-1 ${
               active
                 ? "bg-[#4749B6] text-white shadow-sm"
                 : "text-slate-600 hover:bg-slate-100"
