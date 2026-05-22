@@ -1,24 +1,33 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/i18n/i18n-context";
 import { parseSafeMetamapCallbackId } from "@/lib/embed-security";
 import { getMetamapPublicConfig } from "@/lib/metamap-public-config";
+import { buildMetamapButtonMetadata } from "@/lib/metamap-web-button-metadata";
 
-/** Integración oficial Mati (Direct Link / Web SDK). */
-const MATI_SCRIPT_SRC = "https://web-button.getmati.com/button.js";
+/** Snippet oficial MetaMap: https://web-button.metamap.com/button.js */
+const MATI_SCRIPT_SRC = "https://web-button.metamap.com/button.js";
 
 const MATI_BUTTON_ID = "mati_button";
 
+/** Color de acento Punto Pago (#4749B6). */
+const PP_METAMAP_ACCENT = "#4749B6";
+
 type Props = {
-  /** Obligatorio: identidad creada en Mati antes de abrir el flujo. */
-  identityId: string;
+  /**
+   * Opcional: solo para facematch / re-verificación (UAM).
+   * Sin esto, el SDK crea la verificación al pulsar (como el snippet del dashboard).
+   */
+  identityId?: string | null;
+  oldPhoneE164: string;
+  newPhoneE164: string;
+  merchantLabel?: string | null;
   onComplete: (ids: { verificationId: string; identityId: string }) => void;
   onUserStartedSdk?: () => void;
 };
 
-/** Eventos del web component (documentación MetaMap / Mati). */
 const FINISH_EVENTS = [
   "metamap:userFinishedSdk",
   "mati:userFinishedSdk",
@@ -28,6 +37,9 @@ const EXIT_EVENTS = ["metamap:exitedSdk", "mati:exitedSdk"] as const;
 
 export function ProfileMetamapButton({
   identityId,
+  oldPhoneE164,
+  newPhoneE164,
+  merchantLabel,
   onComplete,
   onUserStartedSdk,
 }: Props) {
@@ -37,6 +49,16 @@ export function ProfileMetamapButton({
   const [scriptReady, setScriptReady] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const lastVerificationRef = useRef<string | null>(null);
+
+  const metadataJson = useMemo(
+    () =>
+      buildMetamapButtonMetadata({
+        oldPhoneE164,
+        newPhoneE164,
+        merchantLabel,
+      }),
+    [oldPhoneE164, newPhoneE164, merchantLabel],
+  );
 
   const attachListeners = useCallback(
     (el: HTMLElement) => {
@@ -64,8 +86,11 @@ export function ProfileMetamapButton({
             "",
         );
         const verificationId = parseSafeMetamapCallbackId(verificationRaw);
-        const identityOut = parseSafeMetamapCallbackId(identityRaw) ?? identityId;
-        if (!verificationId) return;
+        const identityFromEvent = parseSafeMetamapCallbackId(identityRaw);
+        const identityOut =
+          identityFromEvent ??
+          (identityId ? parseSafeMetamapCallbackId(identityId) : null);
+        if (!verificationId || !identityOut) return;
         if (lastVerificationRef.current === verificationId) return;
         lastVerificationRef.current = verificationId;
         onComplete({ verificationId, identityId: identityOut });
@@ -102,17 +127,22 @@ export function ProfileMetamapButton({
 
   useEffect(() => {
     lastVerificationRef.current = null;
-  }, [identityId]);
+  }, [identityId, metadataJson]);
 
   useEffect(() => {
     if (!scriptReady || !wrapRef.current) return;
     const host = wrapRef.current;
     host.replaceChildren();
-    const btn = document.createElement("mati-button");
+    const btn = document.createElement("metamap-button");
     btn.id = MATI_BUTTON_ID;
     btn.setAttribute("clientid", cfg.clientId);
     btn.setAttribute("flowId", cfg.flowId);
-    btn.setAttribute("identityId", identityId);
+    btn.setAttribute("metadata", metadataJson);
+    btn.setAttribute("color", PP_METAMAP_ACCENT);
+    const resolvedIdentity = identityId?.trim();
+    if (resolvedIdentity) {
+      btn.setAttribute("identityId", resolvedIdentity);
+    }
     btn.className =
       "absolute inset-0 z-20 min-h-14 min-w-0 w-full cursor-pointer opacity-0 sm:min-h-[52px]";
     btn.setAttribute("aria-label", ui.matiAria);
@@ -122,7 +152,15 @@ export function ProfileMetamapButton({
       detach();
       host.replaceChildren();
     };
-  }, [scriptReady, cfg.clientId, cfg.flowId, identityId, attachListeners, ui.matiAria]);
+  }, [
+    scriptReady,
+    cfg.clientId,
+    cfg.flowId,
+    identityId,
+    metadataJson,
+    attachListeners,
+    ui.matiAria,
+  ]);
 
   return (
     <div className="space-y-3">

@@ -54,16 +54,16 @@ export const enMessages: AppMessages = {
       "We registered migration from **{{old}}** to **{{new}}**. To finish the profile change we must confirm it is you: have a **valid ID document** ready, tap the button below and follow the on-screen steps (including a **selfie**).",
     metamapBack: "Back to edit numbers",
     metamapDemoHint:
-      "If Mati is unavailable, use the button below to **simulate** verification and continue the flow. With **MATI_CLIENT_SECRET** on the server, the widget tries to create an identity automatically so users can run the real selfie flow.",
-    metamapDemoButton: "Continue without Mati (simulate verification)",
+      "For tests without a document only: simulate the next step. In production the button above opens real verification (ID and selfie) using the same MetaMap dashboard snippet.",
+    metamapDemoButton: "Continue without verification (simulate)",
     metamapSkipHint:
-      "You can complete **ID verification** with the button above, **or**—only for **testing or integration**—skip Mati and continue with demo IDs (this does not replace real production verification).",
+      "The button above opens **ID and selfie** verification (MetaMap creates the session on click; **MATI_CLIENT_SECRET** is not required to try it). For **integration or QA** you may skip and continue with demo data.",
     metamapSkipButton: "Skip verification and continue (demo)",
     metamapProvisionLoading:
       "Preparing Mati verification (document and selfie)…",
     metamapProvisionFailed:
-      "Could not create a Mati identity. Set **MATI_CLIENT_SECRET** on the server (see `.env.example`) or use simulation. Mati may still reject the session later if number validation is not wired on your backend yet.",
-    metamapProvisionRetry: "Retry opening Mati",
+      "Could not create identity via API (optional). For a real selfie use the verification button; you only need dashboard **clientId** and **flowId**.",
+    metamapProvisionRetry: "Retry",
     doneH1: "Profile change completed",
     doneBody:
       "Your identity was validated and the number migration was recorded. You can keep using the Punto Pago app with your new number.",

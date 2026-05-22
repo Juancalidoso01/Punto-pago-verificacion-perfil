@@ -55,16 +55,16 @@ export const esMessages: AppMessages = {
       "Quedó registrada la migración de **{{old}}** a **{{new}}**. Para completar el cambio de perfil debemos confirmar que eres tú: ten a mano un **documento de identidad vigente**, pulsa el botón de abajo y sigue los pasos en pantalla (incluye una **foto tipo selfie**).",
     metamapBack: "Volver y editar números",
     metamapDemoHint:
-      "Si Mati no está disponible, usá el botón de abajo para **simular** la verificación y ver el resto del flujo. Con **MATI_CLIENT_SECRET** en el servidor, el widget intenta crear la identidad automáticamente para abrir el selfie real.",
-    metamapDemoButton: "Continuar sin Mati (simular verificación)",
+      "Solo para pruebas sin documento: simulá el paso siguiente. En producción el botón de arriba abre la verificación real (documento y selfie) con el mismo snippet del dashboard MetaMap.",
+    metamapDemoButton: "Continuar sin verificación (simular)",
     metamapSkipHint:
-      "Podés **verificar con documento y selfie** usando el botón de arriba, o bien—solo para **pruebas o integración**—omitir Mati y seguir con datos demo (no sustituye una verificación real en producción).",
+      "El botón de arriba abre la verificación con **documento y selfie** (MetaMap crea la sesión al pulsar; no hace falta `MATI_CLIENT_SECRET` para probar). Para **integración o QA** podés omitir y seguir con datos demo.",
     metamapSkipButton: "Omitir verificación y continuar (demo)",
     metamapProvisionLoading:
       "Preparando la verificación en Mati (documento y selfie)…",
     metamapProvisionFailed:
-      "No se pudo crear la identidad en Mati. En Vercel (o `.env.local`) agregá **MATI_CLIENT_SECRET** con el Client Secret del dashboard MetaMap → Integration (mismo proyecto que el **Client ID** del botón). Debajo aparece el detalle técnico. Si no, usá la simulación.",
-    metamapProvisionRetry: "Reintentar abrir Mati",
+      "No se pudo crear la identidad por API (opcional). Para selfie real usá el botón de verificación; solo necesitás **clientId** y **flowId** del dashboard.",
+    metamapProvisionRetry: "Reintentar",
     doneH1: "Cambio de perfil completado",
     doneBody:
       "Tu identidad quedó validada y la migración entre números quedó registrada. Puedes seguir usando la aplicación Punto Pago con tu número nuevo.",

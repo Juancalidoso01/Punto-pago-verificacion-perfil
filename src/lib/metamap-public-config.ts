@@ -1,7 +1,7 @@
 /**
- * Mati / MetaMap Web Button (público). clientId y flowId son visibles en el navegador.
- * Script oficial: `https://web-button.getmati.com/button.js` — elemento `<mati-button>` con `identityId`.
- * Opcional: NEXT_PUBLIC_METAMAP_CLIENT_ID, NEXT_PUBLIC_METAMAP_FLOW_ID, NEXT_PUBLIC_METAMAP_IDENTITY_ID
+ * MetaMap Web Button (público). clientId y flowId son visibles en el navegador.
+ * Snippet: `https://web-button.metamap.com/button.js` + `<metamap-button clientid flowId metadata>`.
+ * `identityId` es opcional (facematch); sin él el SDK crea la verificación al pulsar.
  * @see https://docs.metamap.com/docs/web-metamap-button
  */
 const FALLBACK_CLIENT_ID = "612566a0a0be80001b035915";

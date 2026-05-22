@@ -154,76 +154,6 @@ export function CambioPerfilFlow({
     [matiIdentityIdProp],
   );
 
-  const [provisionedIdentityId, setProvisionedIdentityId] = useState<
-    string | null
-  >(null);
-  const [metamapProvisionState, setMetamapProvisionState] = useState<
-    "idle" | "loading" | "error"
-  >("idle");
-  const [metamapProvisionError, setMetamapProvisionError] = useState<
-    string | null
-  >(null);
-
-  const matiIdentityId = matiIdentityIdFromQuery ?? provisionedIdentityId;
-
-  const provisionMatiIdentity = useCallback(async () => {
-    if (matiIdentityIdFromQuery) return;
-    setMetamapProvisionState("loading");
-    setMetamapProvisionError(null);
-    try {
-      const res = await fetch("/api/metamap/ensure-identity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          externalId:
-            oldE164 ||
-            `pp-test-${onlyDigits(oldNational) || onlyDigits(newNational) || "user"}`,
-        }),
-      });
-      const data = (await res.json()) as {
-        identityId?: string;
-        error?: string;
-        code?: string;
-      };
-      if (!res.ok || !data.identityId) {
-        setMetamapProvisionState("error");
-        setMetamapProvisionError(
-          data.error ??
-            (data.code === "MATI_PROVISIONING_DISABLED"
-              ? "Falta MATI_CLIENT_SECRET en el servidor (Vercel → Environment Variables)."
-              : `Error ${res.status} al crear identidad en Mati`),
-        );
-        return;
-      }
-      setProvisionedIdentityId(data.identityId);
-      setMetamapProvisionState("idle");
-      setMetamapProvisionError(null);
-    } catch {
-      setMetamapProvisionState("error");
-      setMetamapProvisionError("No se pudo contactar al servidor del widget.");
-    }
-  }, [matiIdentityIdFromQuery, oldE164, oldNational, newNational]);
-
-  useEffect(() => {
-    setProvisionedIdentityId(null);
-    setMetamapProvisionState("idle");
-    setMetamapProvisionError(null);
-  }, [oldE164, newE164]);
-
-  useEffect(() => {
-    if (step !== "metamap") return;
-    if (matiIdentityIdFromQuery) return;
-    if (provisionedIdentityId) return;
-    if (metamapProvisionState !== "idle") return;
-    void provisionMatiIdentity();
-  }, [
-    step,
-    matiIdentityIdFromQuery,
-    provisionedIdentityId,
-    metamapProvisionState,
-    provisionMatiIdentity,
-  ]);
-
   const oldLen = onlyDigits(oldNational).length;
   const newLen = onlyDigits(newNational).length;
   const oldFormatOk =
@@ -500,78 +430,31 @@ export function CambioPerfilFlow({
               }),
             )}
           </p>
-          {metamapProvisionState === "loading" && !matiIdentityId ? (
-            <p
-              className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 text-sm text-slate-600"
-              role="status"
-            >
-              {t.metamapProvisionLoading}
-            </p>
-          ) : null}
-
-          {metamapProvisionState === "error" && !matiIdentityId ? (
-            <div className="space-y-3">
-              <p
-                className="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-3 text-sm leading-relaxed text-amber-950"
-                role="alert"
-              >
-                {renderInlineStrong(t.metamapProvisionFailed)}
-                {metamapProvisionError ? (
-                  <span className="mt-2 block font-mono text-xs font-normal text-amber-900/90">
-                    {metamapProvisionError}
-                  </span>
-                ) : null}
-              </p>
-              <button
-                type="button"
-                onClick={() => void provisionMatiIdentity()}
-                className={btnSecondary}
-              >
-                {t.metamapProvisionRetry}
-              </button>
-            </div>
-          ) : null}
-
-          {matiIdentityId ? (
-            <div className="space-y-5">
-              <ProfileMetamapButton
-                identityId={matiIdentityId}
-                onComplete={onMetamapComplete}
-                onUserStartedSdk={onMetamapUserStarted}
-              />
-              <div className="space-y-3 border-t border-slate-200/90 pt-5">
-                <div
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700"
-                  role="note"
-                >
-                  {renderInlineStrong(t.metamapSkipHint)}
-                </div>
-                <button
-                  type="button"
-                  onClick={onDemoMetamapContinue}
-                  className={btnSecondary}
-                >
-                  {t.metamapSkipButton}
-                </button>
-              </div>
-            </div>
-          ) : metamapProvisionState !== "loading" ? (
-            <div className="space-y-4">
+          <div className="space-y-5">
+            <ProfileMetamapButton
+              identityId={matiIdentityIdFromQuery}
+              oldPhoneE164={oldE164}
+              newPhoneE164={newE164}
+              merchantLabel={merchantLabel}
+              onComplete={onMetamapComplete}
+              onUserStartedSdk={onMetamapUserStarted}
+            />
+            <div className="space-y-3 border-t border-slate-200/90 pt-5">
               <div
                 className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700"
                 role="note"
               >
-                {renderInlineStrong(t.metamapDemoHint)}
+                {renderInlineStrong(t.metamapSkipHint)}
               </div>
               <button
                 type="button"
                 onClick={onDemoMetamapContinue}
-                className={btnPrimary}
+                className={btnSecondary}
               >
-                {t.metamapDemoButton}
+                {t.metamapSkipButton}
               </button>
             </div>
-          ) : null}
+          </div>
           <button
             type="button"
             onClick={() => {
