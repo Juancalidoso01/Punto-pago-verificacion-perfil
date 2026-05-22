@@ -32,6 +32,16 @@ Definir en `.env.local` o en el proveedor de despliegue. Los valores por defecto
 
 Los **secretos** de API Mati no deben commitearse. En Vercel: **Settings → Environment Variables** → `MATI_CLIENT_SECRET` (y opcionalmente las `NEXT_PUBLIC_*`).
 
+## Webhooks MetaMap (solo pruebas internas)
+
+Desactivados por defecto; no cambian el flujo del widget (verificar u omitir sigue igual).
+
+1. En Vercel: `METAMAP_WEBHOOK_ENABLED=true` y `METAMAP_WEBHOOK_SECRET` (el mismo que configurás en MetaMap → Integration → Webhooks).
+2. URL del webhook: `https://<tu-deploy>/api/metamap/webhook`
+3. Guía interna: [/guia/webhooks-prueba](http://localhost:3000/guia/webhooks-prueba) (listado en memoria en local; en Vercel usá logs con filtro `metamap-webhook` o `METAMAP_WEBHOOK_DEBUG_TOKEN`).
+
+Especificación: [Webhook specifications](https://docs.metamap.com/docs/webhook-specifications).
+
 ## Pasar el proyecto a otro equipo
 
 1. **Código**: acceso al repositorio o archivo acordado.  
