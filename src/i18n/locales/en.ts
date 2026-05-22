@@ -54,11 +54,16 @@ export const enMessages: AppMessages = {
       "We registered migration from **{{old}}** to **{{new}}**. To finish the profile change we must confirm it is you: have a **valid ID document** ready, tap the button below and follow the on-screen steps (including a **selfie**).",
     metamapBack: "Back to edit numbers",
     metamapDemoHint:
-      "Without a valid **identityId**, the Mati SDK does not open. Use the button below to simulate a verification and walk through the rest of the flow; in production the embed must pass `?identityId=…` or `NEXT_PUBLIC_METAMAP_IDENTITY_ID` for tests.",
+      "If Mati is unavailable, use the button below to **simulate** verification and continue the flow. With **MATI_CLIENT_SECRET** on the server, the widget tries to create an identity automatically so users can run the real selfie flow.",
     metamapDemoButton: "Continue without Mati (simulate verification)",
     metamapSkipHint:
       "You can complete **ID verification** with the button above, **or**—only for **testing or integration**—skip Mati and continue with demo IDs (this does not replace real production verification).",
     metamapSkipButton: "Skip verification and continue (demo)",
+    metamapProvisionLoading:
+      "Preparing Mati verification (document and selfie)…",
+    metamapProvisionFailed:
+      "Could not create a Mati identity. Set **MATI_CLIENT_SECRET** on the server (see `.env.example`) or use simulation. Mati may still reject the session later if number validation is not wired on your backend yet.",
+    metamapProvisionRetry: "Retry opening Mati",
     doneH1: "Profile change completed",
     doneBody:
       "Your identity was validated and the number migration was recorded. You can keep using the Punto Pago app with your new number.",

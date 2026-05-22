@@ -15,7 +15,7 @@ function sanitizeMetamapHexId(value: string, fallback: string): string {
   return t;
 }
 
-function isValidMatiHexIdentityId(value: string): boolean {
+export function isValidMatiHexIdentityId(value: string): boolean {
   const t = value.trim();
   return t.length >= 8 && t.length <= 64 && /^[a-f0-9]+$/i.test(t);
 }

@@ -28,7 +28,9 @@ Definir en `.env.local` o en el proveedor de despliegue. Los valores por defecto
 | `NEXT_PUBLIC_METAMAP_FLOW_ID` | `flowId` del flujo Mati (visible en el cliente). |
 | `NEXT_PUBLIC_METAMAP_IDENTITY_ID` | Opcional, **solo pruebas**: identidad fija; en real el `identityId` debe venir del backend vía query `?identityId=…`. |
 
-Los **secretos** de API Mati (crear identidades, consultar verificaciones) viven **solo en el servidor** del banco o integrador, nunca en este repo.
+| `MATI_CLIENT_SECRET` | **Solo servidor.** Crea `identityId` al entrar al paso Mati para pruebas con selfie real (`POST /api/metamap/ensure-identity`). Sin esto, el flujo ofrece simulación o `?identityId=…` manual. |
+
+Los **secretos** de API Mati no deben commitearse. En Vercel: **Settings → Environment Variables** → `MATI_CLIENT_SECRET` (y opcionalmente las `NEXT_PUBLIC_*`).
 
 ## Pasar el proyecto a otro equipo
 

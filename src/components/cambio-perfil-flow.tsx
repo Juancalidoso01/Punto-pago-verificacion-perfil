@@ -149,10 +149,66 @@ export function CambioPerfilFlow({
     [newDial, newNational],
   );
 
-  const matiIdentityId = useMemo(
+  const matiIdentityIdFromQuery = useMemo(
     () => resolveMatiIdentityId(matiIdentityIdProp ?? null),
     [matiIdentityIdProp],
   );
+
+  const [provisionedIdentityId, setProvisionedIdentityId] = useState<
+    string | null
+  >(null);
+  const [metamapProvisionState, setMetamapProvisionState] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+
+  const matiIdentityId = matiIdentityIdFromQuery ?? provisionedIdentityId;
+
+  const provisionMatiIdentity = useCallback(async () => {
+    if (matiIdentityIdFromQuery) return;
+    setMetamapProvisionState("loading");
+    try {
+      const res = await fetch("/api/metamap/ensure-identity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          externalId:
+            oldE164 ||
+            `pp-test-${onlyDigits(oldNational) || onlyDigits(newNational) || "user"}`,
+        }),
+      });
+      const data = (await res.json()) as {
+        identityId?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.identityId) {
+        setMetamapProvisionState("error");
+        return;
+      }
+      setProvisionedIdentityId(data.identityId);
+      setMetamapProvisionState("idle");
+    } catch {
+      setMetamapProvisionState("error");
+    }
+  }, [matiIdentityIdFromQuery, oldE164, oldNational, newNational]);
+
+  useEffect(() => {
+    setProvisionedIdentityId(null);
+    setMetamapProvisionState("idle");
+  }, [oldE164, newE164]);
+
+  useEffect(() => {
+    if (step !== "metamap") return;
+    if (matiIdentityIdFromQuery) return;
+    if (provisionedIdentityId) return;
+    if (metamapProvisionState !== "idle") return;
+    void provisionMatiIdentity();
+  }, [
+    step,
+    matiIdentityIdFromQuery,
+    provisionedIdentityId,
+    metamapProvisionState,
+    provisionMatiIdentity,
+  ]);
 
   const oldLen = onlyDigits(oldNational).length;
   const newLen = onlyDigits(newNational).length;
@@ -430,6 +486,33 @@ export function CambioPerfilFlow({
               }),
             )}
           </p>
+          {metamapProvisionState === "loading" && !matiIdentityId ? (
+            <p
+              className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 text-sm text-slate-600"
+              role="status"
+            >
+              {t.metamapProvisionLoading}
+            </p>
+          ) : null}
+
+          {metamapProvisionState === "error" && !matiIdentityId ? (
+            <div className="space-y-3">
+              <p
+                className="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-3 text-sm leading-relaxed text-amber-950"
+                role="alert"
+              >
+                {renderInlineStrong(t.metamapProvisionFailed)}
+              </p>
+              <button
+                type="button"
+                onClick={() => void provisionMatiIdentity()}
+                className={btnSecondary}
+              >
+                {t.metamapProvisionRetry}
+              </button>
+            </div>
+          ) : null}
+
           {matiIdentityId ? (
             <div className="space-y-5">
               <ProfileMetamapButton
@@ -453,7 +536,7 @@ export function CambioPerfilFlow({
                 </button>
               </div>
             </div>
-          ) : (
+          ) : metamapProvisionState !== "loading" ? (
             <div className="space-y-4">
               <div
                 className="rounded-xl border border-slate-200/90 bg-slate-50/90 p-4 text-sm leading-relaxed text-slate-700"
@@ -469,7 +552,7 @@ export function CambioPerfilFlow({
                 {t.metamapDemoButton}
               </button>
             </div>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={() => {
